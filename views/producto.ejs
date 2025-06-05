@@ -59,7 +59,9 @@
     <div class="card-producto-columna-contenido">
       <div class="card-producto-header">
         <h1 class="card-producto-titulo"><%= producto.nombre %></h1>
-        <span class="card-producto-marca">Forestal Santa Blanca</span>
+        <p class="card-producto-stock">
+      Stock disponible: <%= producto.stock %> unidades
+      </p>
         <p class="card-producto-descripcion"><%= producto.descripcion %></p>
       </div>
 
@@ -69,7 +71,9 @@
         <h2 class="card-subtitulo">Cantidad</h2>
         <div class="card-contador">
           <button class="card-btn-contador" id="decrease-btn" type="button">-</button>
-          <span class="card-cantidad-valor" id="quantity">1</span>
+<!-- En algún lugar dentro de tu HTML renderizado -->
+          <span id="quantity" data-stock="<%= producto.stock %>">1</span>
+
           <button class="card-btn-contador" id="increase-btn" type="button">+</button>
         </div>
       </div>
@@ -328,38 +332,51 @@
 </footer>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const decreaseBtn = document.getElementById('decrease-btn');
-    const increaseBtn = document.getElementById('increase-btn');
-    const qtyEl        = document.getElementById('quantity');
-    const totalEl      = document.getElementById('total-price');
-    // Leemos el precio unitario del data-attribute
-    const unitPrice    = parseFloat(totalEl.dataset.unitPrice);
+document.addEventListener('DOMContentLoaded', () => {
+  const decreaseBtn = document.getElementById('decrease-btn');
+  const increaseBtn = document.getElementById('increase-btn');
+  const qtyEl       = document.getElementById('quantity');
+  const totalEl     = document.getElementById('total-price');
 
-    // Función que recalcula y actualiza el total
-    function updateTotal() {
-      const qty = parseInt(qtyEl.textContent, 10);
-      const newTotal = (unitPrice * qty).toFixed(2);
-      totalEl.textContent = 'S/' + newTotal;
-    }
+  const unitPrice = parseFloat(totalEl.dataset.unitPrice);
+  const stockDisponible = parseInt(qtyEl.dataset.stock, 10);
 
-    increaseBtn.addEventListener('click', () => {
-      let qty = parseInt(qtyEl.textContent, 10);
+  function updateTotal() {
+    const qty = parseInt(qtyEl.textContent, 10);
+    const newTotal = (unitPrice * qty).toFixed(2);
+    totalEl.textContent = 'S/' + newTotal;
+  }
+
+  function updateButtons(qty) {
+    decreaseBtn.disabled = qty <= 1;
+    increaseBtn.disabled = qty >= stockDisponible;
+  }
+
+  increaseBtn.addEventListener('click', () => {
+    let qty = parseInt(qtyEl.textContent, 10);
+    if (qty < stockDisponible) {
       qty += 1;
       qtyEl.textContent = qty;
       updateTotal();
-    });
-
-    decreaseBtn.addEventListener('click', () => {
-      let qty = parseInt(qtyEl.textContent, 10);
-      // Solo permitimos bajar mientras qty > 1
-      if (qty > 1) {
-        qty -= 1;
-        qtyEl.textContent = qty;
-        updateTotal();
-      }
-    });
+      updateButtons(qty);
+    }
   });
+
+  decreaseBtn.addEventListener('click', () => {
+    let qty = parseInt(qtyEl.textContent, 10);
+    if (qty > 1) {
+      qty -= 1;
+      qtyEl.textContent = qty;
+      updateTotal();
+      updateButtons(qty);
+    }
+  });
+
+  // Inicializar estado de botones al cargar
+  updateButtons(parseInt(qtyEl.textContent, 10));
+});
+
+
 
   const addToCartBtn = document.getElementById('add-to-cart-btn');
 const buyNowBtn = document.getElementById('buy-now-btn');
