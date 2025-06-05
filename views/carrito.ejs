@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Martin</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/carrito.css">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+</head>
+
+<script>
+  function mostrarSeccion(seccionMostrada) {
+    const secciones = ['estilo-recojo', 'estilo-delivery'];
+    secciones.forEach(seccion => {
+      const elemento = document.querySelector(`.${seccion}`);
+      if (elemento) {
+        elemento.style.display = (seccion === seccionMostrada) ? 'block' : 'none';
+      }
+    });
+  }
+
+  // Mostrar solo el recojo por defecto al cargar
+  document.addEventListener('DOMContentLoaded', () => {
+    mostrarSeccion('estilo-recojo');
+  });
+</script>
+
+<body>
+
+<div class="barra-top">OFERTAS ESPECIALES</div>
+
+
+<header class="encabezado">
+    <a class="logo" href="index.html">
+    <img src="../img/logo.png" alt="Logo">
+    </a>
+
+  <div class="zona-derecha">
+    <div class="buscador">
+      <input type="text" placeholder="¿Qué estás buscando?">
+    </div>
+<a href="/carrito">
+  <img class="boton-superior" src="../img/carrito.png" alt="Carrito">
+</a>
+
+<div id="saludo-usuario" class="boton-superior" style="display: flex; align-items: center; gap: 10px;">
+  <img id="usuario-img" src="../img/usuario.png" alt="Usuario" style="width: 30px;">
+  <div id="dropdown-menu" class="dropdown oculto">
+  <span id="nombre-usuario" style="color: #000;"></span>
+  <button id="cerrar-sesion" style="display: none; padding: 4px 10px; background-color: #800080; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+    Cerrar sesión
+  </button>
+  </div>
+
+  </div>
+</header>
+
+
+
+
+  <nav class="navbar">
+    <ul class="nav-lista">
+      <li><a href="/">Inicio</a></li>
+      <li><a href="ferreteria.html">Catálogo</a></li>
+      <li><a href="#nosotros">Nosotros</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+  </nav>
+
+<section class="estilo-carro">
+<h1>Carrito de Compras</h1>
+
+  <% if (carrito.length === 0) { %>
+    <p>Tu carrito está vacío.</p>
+  <% } else { %>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% carrito.forEach(p => { %>
+          <tr>
+            <td><%= p.nombre %></td>
+            <td>S/. <%= Number(p.precio).toFixed(2) %></td>
+
+            <td>
+              <form action="/carrito/actualizar/<%= p.id_producto %>" method="POST">
+                <input type="number" name="cantidad" value="<%= p.cantidad %>" min="1">
+                <button type="submit">Actualizar</button>
+              </form>
+            </td>
+            <td>S/. <%= (p.precio * p.cantidad).toFixed(2) %></td>
+            <td>
+              <form action="/carrito/eliminar/<%= p.id_producto %>" method="POST">
+                <button type="submit">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <h3>Total: S/. <span id="subtotal" data-subtotal="<%= total.toFixed(2) %>"><%= total.toFixed(2) %></span></h3>
+  <% } %>
+
+  <a href="/">Seguir comprando</a>
+  </section>
+
+  <div class="contenedor-botones" style="text-align: center; margin-top: 20px;">
+  <button onclick="mostrarSeccion('estilo-recojo')">Recojo en tienda</button>
+  <button onclick="mostrarSeccion('estilo-delivery')">Delivery</button>
+</div>
+
+  <section class="estilo-recojo">
+  <h2>Selecciona un punto de recojo</h2>
+
+  <div class="form-container">
+    <form action="/seleccionar-sede" method="POST">
+      <div class="sede">
+        <input type="radio" id="sede1" name="sede" value="Sede 1" required>
+        <label for="sede1">Sede 1 - Av. Lima 123</label>
+      </div>
+
+      <div class="sede">
+        <input type="radio" id="sede2" name="sede" value="Sede 2">
+        <label for="sede2">Sede 2 - Jr. Arequipa 456</label>
+      </div>
+
+      <div class="sede">
+        <input type="radio" id="sede3" name="sede" value="Sede 3">
+        <label for="sede3">Sede 3 - Calle Cusco 789</label>
+      </div>
+
+      <div class="sede">
+        <input type="radio" id="sede4" name="sede" value="Sede 4">
+        <label for="sede4">Sede 4 - Av. Grau 101</label>
+      </div>
+
+      <button type="submit">Confirmar selección</button>
+    </form>
+  </div>
+</section>
+
+<section class="estilo-delivery">
+ <div class="container">
+  <div class="address-container">
+    <h3>Dirección</h3>
+    
+    <div class="map-container">
+      <div id="map"></div>
+      <div class="address-form">
+        <select id="district">
+          <option value="" disabled selected>Seleccione un distrito</option>
+        </select>
+        <input type="text" id="address" placeholder="Dirección">
+        <input type="text" id="reference" placeholder="Referencia">
+      </div>
+    </div>
+
+    <div class="delivery-info">
+      <div class="delivery">
+        <p><strong>Delivery:</strong> S/ <span id="delivery-price">0.00</span></p>
+      </div>
+
+      <div class="total">
+  <p><strong>Total:</strong> S/ <span id="total-pago"><%= total.toFixed(2) %></span></p>
+</div>
+
+    </div>
+  </div>
+</div>
+</section>
+
+      
+    
+<div class="payment-method">
+  <h3>Método de pago</h3>
+  <p>Seleccione el tipo de pago y cargue la evidencia</p>
+
+  <div class="payment-buttons">
+    <button class="payment-btn green">Tarjeta débito / crédito</button>
+    <button class="payment-btn purple">Yape</button>
+    <button class="payment-btn teal">Plin</button>
+    <button class="payment-btn yellow">Pago Efectivo</button>
+  </div>
+
+  <!-- AQUI VA EL NUEVO CONTENEDOR -->
+  <div class="image-container"></div>
+
+ <form action="/carrito/pagar" method="POST">
+  <button type="submit" class="complete-btn">Pagar</button>
+</form>
+
+</div>
+
+  
+
+
+    
+
+
+
+  <footer id="contacto" class="footer">
+  <div class="footer-container">
+      <h1 class="brand-name">MARTIN</h1>
+
+    <div class="footer-columns">
+      <div class="footer-column">
+        <h2>Nosotros</h2>
+        <ul>
+          <li>La empresa</li>
+          <li>Nuestras tiendas</li>
+          <li>Ventas corporativas</li>
+          <li>Trabaja con nosotros</li>
+          <li>Política SIG</li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h2>Legales</h2>
+        <ul>
+          <li>Políticas de privacidad</li>
+          <li>Términos y condiciones</li>
+          <li>Política de Modelo de prevención</li>
+          <li>Política Anticorrupción</li>
+          <li>Política de Lavado de Activo y terrorismo</li>
+          <li>Política de Prevención de Delitos Tributarios y Contables</li>
+          <li>Política de Prevención de Delitos Aduaneros</li>
+          <li>Canal de Denuncias</li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h2>Contáctanos</h2>
+        <ul>
+          <li>Email: ventas@martin.com.pe</li>
+          <li>01-2171300</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>Todos los derechos reservados - Representaciones Martín S.A.C. 2020</p>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  // 1. Referencias a elementos
+  const buttons = document.querySelectorAll('.payment-btn');
+  const displayContainer = document.querySelector('.image-container');
+
+  // 2. Función para limpiar el contenedor
+  function clearContainer() {
+    displayContainer.innerHTML = '';
+  }
+
+  // 3. Función para mostrar imagen
+  function showImage(src, alt = '') {
+    clearContainer();
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = alt;
+    img.classList.add('payment-image');
+    displayContainer.appendChild(img);
+  }
+
+  // 4. Función para mostrar formulario de tarjeta
+  function showCardForm() {
+    clearContainer();
+    const form = document.createElement('form');
+    form.classList.add('card-form');
+    form.innerHTML = `
+      <div>
+        <label for="card-holder">Nombre del titular:</label>
+        <input type="text" id="card-holder" name="cardHolder" placeholder="Nombre completo" required>
+      </div>
+      <div>
+        <label for="card-number">Número de tarjeta:</label>
+        <input type="text" id="card-number" name="cardNumber" placeholder="#### #### #### ####" required>
+      </div>
+      <div class="input-group">
+        <div class="small-input">
+          <label for="expiry-month">Mes:</label>
+          <input type="text" id="expiry-month" name="expiryMonth" placeholder="MM" maxlength="2" required>
+        </div>
+        <div class="small-input">
+          <label for="expiry-year">Año:</label>
+          <input type="text" id="expiry-year" name="expiryYear" placeholder="AA" maxlength="2" required>
+        </div>
+      </div>
+      <div>
+        <label for="cvv">CVV:</label>
+        <input type="text" id="cvv" name="cvv" placeholder="###" maxlength="3" required>
+      </div>
+    `;
+    displayContainer.appendChild(form);
+  }
+
+  // 5. Asignar eventos a cada botón
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const method = btn.textContent.trim().toLowerCase();
+      switch (method) {
+        case 'yape':
+          showImage('../img/yape.jpg', 'Pago con Yape');
+          break;
+        case 'plin':
+          showImage('../img/plin.png', 'Pago con Plin');
+          break;
+        case 'pago efectivo':
+          showImage('../img/pagoefectivo.jpg', 'Pago en efectivo');
+          break;
+        case 'tarjeta débito / crédito':
+          showCardForm();
+          break;
+      }
+    });
+  });
+
+// Initialize Leaflet map
+const map = L.map('map').setView([-12.0464, -77.0428], 12); // Lima, Peru
+
+// Add OpenStreetMap tiles to the map
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+// Distritos de Lima
+const districts = [
+  "Ancón", "Ate", "Barranco", "Breña", "Carabayllo", "Cercado de Lima", "Chaclacayo", 
+  "Chorrillos", "Cieneguilla", "Comas", "El Agustino", "Independencia", "Jesús María", 
+  "La Molina", "La Victoria", "Lince", "Los Olivos", "Lurigancho", "Lurín", "Magdalena del Mar", 
+  "Miraflores", "Pachacamac", "Pucusana", "Pueblo Libre", "Puente Piedra", "Punta Hermosa", 
+  "Punta Negra", "Rímac", "San Bartolo", "San Borja", "San Isidro", "San Juan de Lurigancho", 
+  "San Juan de Miraflores", "San Luis", "San Martín de Porres", "San Miguel", "Santa Anita", 
+  "Santa María del Mar", "Santa Rosa", "Santiago de Surco", "Surquillo", "Villa El Salvador", 
+  "Villa María del Triunfo"
+];
+
+// Llenar el select con los distritos
+const districtSelect = document.getElementById('district');
+districts.forEach(district => {
+  const option = document.createElement('option');
+  option.value = district;
+  option.textContent = district;
+  districtSelect.appendChild(option);
+});
+
+// Función para generar un precio de delivery entre 10 y 20 soles (solo enteros)
+function getDeliveryPrice() {
+  return Math.floor(Math.random() * (20 - 10 + 1)) + 10;
+}
+
+// Event listener para actualizar el precio de delivery según el distrito seleccionado
+districtSelect.addEventListener('change', () => {
+  const deliveryPrice = getDeliveryPrice();
+  document.getElementById('delivery-price').textContent = deliveryPrice;
+});
+
+
+  
+
+
+ const subtotalEl    = document.getElementById('subtotal');
+  const deliveryEl    = document.getElementById('delivery-price');
+  const totalPagoEl   = document.getElementById('total-pago');
+  
+
+  // Función para recalcular y mostrar el total final
+  function actualizarTotalPago() {
+    // Subtotal original (desde data-attribute)
+    const subtotal = parseFloat(subtotalEl.dataset.subtotal) || 0;
+    // Delivery actual (texto del span)
+    const delivery = parseFloat(deliveryEl.textContent)    || 0;
+    // Total final
+    const totalFinal = subtotal + delivery;
+    // Mostrarlo
+    totalPagoEl.textContent = totalFinal.toFixed(2);
+  }
+
+  // Cada vez que cambie el distrito (y por ende el delivery), recalcúlate
+  if (districtSelect) {
+    districtSelect.addEventListener('change', () => {
+      // Genera un nuevo delivery aleatorio
+      const nuevoDelivery = getDeliveryPrice();
+      deliveryEl.textContent = nuevoDelivery.toFixed(2);
+      actualizarTotalPago();
+    });
+  }
+
+  // Al cargar la página, calcula por primera vez
+  document.addEventListener('DOMContentLoaded', actualizarTotalPago);
+
+</script>
+
+
+<script src="../js/SesionInit.js"></script>
+
+</body>
+</html>

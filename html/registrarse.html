@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro</title>
+  <link rel="stylesheet" href="../css/styles.css"/>
+
+  <style>
+    .notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #4caf50;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      animation: fadeInOut 3s ease-in-out forwards;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/">
+    <div class="logo-container">
+      <img src="../img/logo.png" alt="Logo MARTIN" class="brand-logo"/>
+    </div>
+  </a>
+
+  <div class="login-container">
+    <div class="login-form">
+      <h2 class="form-title">Registrarse</h2>
+
+      <form id="formRegister">
+        <div class="form-group">
+          <input type="text" name="name" placeholder="Usuario" required />
+        </div>
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Correo electrónico" required />
+        </div>
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Contraseña" required />
+        </div>
+        <button type="submit" class="login-button">Registrarse</button>
+      </form>
+
+      <div class="register-link">
+        <p>¿Ya tienes cuenta?</p>
+        <a href="login.html">Inicia sesión</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('formRegister').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+
+      // Aquí simulas que se hizo el registro correctamente.
+      // Si tu backend estuviera disponible, la llamada al servidor iría aquí.
+      
+      setTimeout(() => {
+        // Simula una respuesta exitosa:
+        const data = { status: 'ok', nombre: formData.get('name'), correo: formData.get('email') };
+
+        if (data.status === 'ok') {
+          localStorage.setItem('nombreUsuario', data.nombre);
+          localStorage.setItem('correoUsuario', data.correo);
+
+          // Mostrar notificación de éxito
+          const notif = document.createElement('div');
+          notif.classList.add('notification');
+          notif.textContent = 'Registro exitoso';
+          document.body.appendChild(notif);
+
+          // Redirigir después de unos segundos
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 3000);
+        } else {
+          alert('Hubo un problema al registrarse.');
+        }
+      }, 1000);  // Simula una espera como si fuera el proceso de un backend.
+    });
+  </script>
+</body>
+</html>

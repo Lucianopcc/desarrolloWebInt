@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Martin</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+
+</head>
+<body>
+
+<div class="barra-top">OFERTAS ESPECIALES</div>
+
+
+<header class="encabezado">
+    <a class="logo" href="/">
+    <img src="../img/logo.png" alt="Logo">
+    </a>
+
+  <div class="zona-derecha">
+    <div class="buscador">
+      <input type="text" placeholder="¿Qué estás buscando?">
+    </div>
+<a href="/carrito">
+   <img class="boton-superior" href="#" src="../img/carrito.png" alt="Carrito">
+</a>
+<div id="saludo-usuario" class="boton-superior" style="display: flex; align-items: center; gap: 10px;">
+  <img id="usuario-img" src="../img/usuario.png" alt="Usuario" style="width: 30px;">
+  <div id="dropdown-menu" class="dropdown oculto">
+  <span id="nombre-usuario" style="color: #000;"></span>
+  <button id="cerrar-sesion" style="display: none; padding: 4px 10px; background-color: #800080; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+    Cerrar sesión
+  </button>
+  </div>
+
+  </div>
+</header>
+
+  <nav class="navbar">
+    <ul class="nav-lista">
+      <li><a href="/">Inicio</a></li>
+      <li><a href="../html/ferreteria.html">Catálogo</a></li>
+      <li><a href="#contacto">Nosotros</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+  </nav>
+
+
+<div class="card-producto">
+  <div class="card-producto-contenedor">
+    <!-- Columna de imagen -->
+    <div class="card-producto-columna-imagen">
+      
+
+        <img class="card-producto-imagen" src="<%= producto.imagen %>" alt="<%= producto.nombre %>" />
+    </div>
+
+    <!-- Columna de contenido -->
+    <div class="card-producto-columna-contenido">
+      <div class="card-producto-header">
+        <h1 class="card-producto-titulo"><%= producto.nombre %></h1>
+        <span class="card-producto-marca">Forestal Santa Blanca</span>
+        <p class="card-producto-descripcion"><%= producto.descripcion %></p>
+      </div>
+
+      <hr class="card-producto-divider">
+
+      <div class="card-cantidad">
+        <h2 class="card-subtitulo">Cantidad</h2>
+        <div class="card-contador">
+          <button class="card-btn-contador" id="decrease-btn" type="button">-</button>
+          <span class="card-cantidad-valor" id="quantity">1</span>
+          <button class="card-btn-contador" id="increase-btn" type="button">+</button>
+        </div>
+      </div>
+
+      <div class="card-total">
+        <h3 class="card-subtitulo">Total</h3>
+        <span 
+    class="card-precio-total" 
+    id="total-price" 
+    data-unit-price="<%= Number(producto.precio) %>"
+  >
+
+    S/<%= Number(producto.precio).toFixed(2) %>
+  </span>
+
+      </div>
+
+      <hr class="card-producto-divider">
+
+      <div class="card-botones-accion">
+        <input type="hidden" id="producto-id" value="<%= producto.id_producto %>">
+        <button class="card-btn card-btn-secundario" id="add-to-cart-btn" type="button">Añadir al carrito</button>
+        <button class="card-btn card-btn-primario" id="buy-now-btn" type="button">Comprar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <section class="mas-vendidos">
+    <h2>Los más vendidos</h2>
+    <div class="productos">
+
+      <div class="producto-card">
+        <a href="Pino Radiata.html"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/12.00</p>
+          <p class="nombre">Pino Radiata S4S<br>Grado Mueble</p>
+          <p class="marca">Forestal Santa Blanca</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera2.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/30.00</p>
+          <p class="nombre">Melamina Chiavenna</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera3.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/25.00</p>
+          <p class="nombre">Melamina Entablado Natural</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera4.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/26.00</p>
+          <p class="nombre">Melamina Roble Negro</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+       <div class="producto-card">
+        <a href=""><img src="../img/madera5.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/28.00</p>
+          <p class="nombre">Melamina Roble Canela</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+       <div class="producto-card">
+        <a href=""><img src="../img/madera6.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/30.00</p>
+          <p class="nombre">Melamina Sonoma Eiche</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="liquidacion">
+    <h2>Liquidación</h2>
+    <div class="productos">
+
+      <div class="producto-card">
+        <a href="#"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/12.00</p>
+          <p class="nombre">Pino Radiata S4S<br>Grado Mueble</p>
+          <p class="marca">Forestal Santa Blanca</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera2.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/30.00</p>
+          <p class="nombre">Melamina Chiavenna</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera3.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/25.00</p>
+          <p class="nombre">Melamina Entablado Natural</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera4.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/26.00</p>
+          <p class="nombre">Melamina Roble Negro</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+       <div class="producto-card">
+        <a href=""><img src="../img/madera5.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/28.00</p>
+          <p class="nombre">Melamina Roble Canela</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+       <div class="producto-card">
+        <a href=""><img src="../img/madera6.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/30.00</p>
+          <p class="nombre">Melamina Sonoma Eiche</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+   <section class="mas-vendidos">
+    <h2>Los más vendidos</h2>
+    <div class="productos">
+
+      <div class="producto-card">
+        <a href="#"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/12.00</p>
+          <p class="nombre">Pino Radiata S4S<br>Grado Mueble</p>
+          <p class="marca">Forestal Santa Blanca</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera2.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/30.00</p>
+          <p class="nombre">Melamina Chiavenna</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera3.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/25.00</p>
+          <p class="nombre">Melamina Entablado Natural</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera4.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/26.00</p>
+          <p class="nombre">Melamina Roble Negro</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+       <div class="producto-card">
+        <a href=""><img src="../img/madera5.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/28.00</p>
+          <p class="nombre">Melamina Roble Canela</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+       <div class="producto-card">
+        <a href=""><img src="../img/madera6.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/30.00</p>
+          <p class="nombre">Melamina Sonoma Eiche</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer id="contacto" class="footer">
+  <div class="footer-container">
+      <h1 class="brand-name">MARTIN</h1>
+
+    <div class="footer-columns">
+      <div class="footer-column">
+        <h2>Nosotros</h2>
+        <ul>
+          <li>La empresa</li>
+          <li>Nuestras tiendas</li>
+          <li>Ventas corporativas</li>
+          <li>Trabaja con nosotros</li>
+          <li>Política SIG</li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h2>Legales</h2>
+        <ul>
+          <li>Políticas de privacidad</li>
+          <li>Términos y condiciones</li>
+          <li>Política de Modelo de prevención</li>
+          <li>Política Anticorrupción</li>
+          <li>Política de Lavado de Activo y terrorismo</li>
+          <li>Política de Prevención de Delitos Tributarios y Contables</li>
+          <li>Política de Prevención de Delitos Aduaneros</li>
+          <li>Canal de Denuncias</li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h2>Contáctanos</h2>
+        <ul>
+          <li>Email: ventas@martin.com.pe</li>
+          <li>01-2171300</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>Todos los derechos reservados - Representaciones Martín S.A.C. 2020</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const decreaseBtn = document.getElementById('decrease-btn');
+    const increaseBtn = document.getElementById('increase-btn');
+    const qtyEl        = document.getElementById('quantity');
+    const totalEl      = document.getElementById('total-price');
+    // Leemos el precio unitario del data-attribute
+    const unitPrice    = parseFloat(totalEl.dataset.unitPrice);
+
+    // Función que recalcula y actualiza el total
+    function updateTotal() {
+      const qty = parseInt(qtyEl.textContent, 10);
+      const newTotal = (unitPrice * qty).toFixed(2);
+      totalEl.textContent = 'S/' + newTotal;
+    }
+
+    increaseBtn.addEventListener('click', () => {
+      let qty = parseInt(qtyEl.textContent, 10);
+      qty += 1;
+      qtyEl.textContent = qty;
+      updateTotal();
+    });
+
+    decreaseBtn.addEventListener('click', () => {
+      let qty = parseInt(qtyEl.textContent, 10);
+      // Solo permitimos bajar mientras qty > 1
+      if (qty > 1) {
+        qty -= 1;
+        qtyEl.textContent = qty;
+        updateTotal();
+      }
+    });
+  });
+
+  const addToCartBtn = document.getElementById('add-to-cart-btn');
+const buyNowBtn = document.getElementById('buy-now-btn');
+const quantityElement = document.getElementById('quantity');
+const productoId = parseInt(document.getElementById('producto-id').value); // ID como número
+
+// Añadir al carrito sin redirigir
+addToCartBtn.addEventListener('click', () => {
+  const cantidad = parseInt(quantityElement.textContent);
+
+  fetch('/carrito/agregar', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ productoId, cantidad })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert('Producto añadido al carrito');
+  })
+  .catch(error => {
+    console.error('Error al añadir al carrito:', error);
+  });
+});
+
+// Comprar y redirigir al carrito
+buyNowBtn.addEventListener('click', () => {
+  const cantidad = parseInt(quantityElement.textContent);
+
+  fetch('/carrito/agregar', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ productoId, cantidad })
+  })
+  .then(res => res.json())
+  .then(data => {
+    window.location.href = '/carrito';
+  })
+  .catch(error => {
+    console.error('Error al procesar la compra:', error);
+  });
+});
+
+</script>
+
+
+
+
+
+<script src="../js/SesionInit.js"></script>
+
+</body>
+
+</html>

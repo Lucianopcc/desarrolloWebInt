@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Martin</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+
+</head>
+<body>
+
+<div class="barra-top">OFERTAS ESPECIALES</div>
+
+<header class="encabezado">
+    <a class="logo" href="/">
+    <img src="../img/logo.png" alt="Logo">
+    </a>
+
+  <div class="zona-derecha">
+    <div class="buscador">
+      <input type="text" placeholder="¿Qué estás buscando?">
+    </div>
+<a href="/carrito">
+   <img class="boton-superior" href="#" src="../img/carrito.png" alt="Carrito">
+</a>
+<div id="saludo-usuario" class="boton-superior" style="display: flex; align-items: center; gap: 10px;">
+  <img id="usuario-img" src="../img/usuario.png" alt="Usuario" style="width: 30px;">
+  <div id="dropdown-menu" class="dropdown oculto">
+  <span id="nombre-usuario" style="color: #000;"></span>
+  <button id="cerrar-sesion" style="display: none; padding: 4px 10px; background-color: #800080; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+    Cerrar sesión
+  </button>
+  </div>
+
+</div>
+
+
+
+  </div>
+</header>
+
+  <nav class="navbar">
+    <ul class="nav-lista">
+      <li><a href="/">Inicio</a></li>
+      <li><a href="ferreteria.html">Catálogo</a></li>
+      <li><a href="#nosotros">Nosotros</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <section class="destacado">
+        <h1>Todo lo que necesitas en un solo lugar</h1>
+        <div class="botones">
+            <a href="ferreteria.html" class="boton">Ferretería</a>
+            <a href="pisos.html" class="boton">Pisos</a>
+            <a href="luminarias.html" class="boton">Luminarias</a>
+            <a href="techos.html" class="boton">Techos</a>
+        </div>
+    </section>
+
+ <section class="mas-vendidos">
+    <h2>Los más vendidos</h2>
+    <div class="productos">
+
+     <% productos.forEach(producto => { %>
+  <div class="producto-card">
+    <a href="/producto/<%= producto.id_producto %>">
+      <img src="<%= producto.imagen %>" alt="<%= producto.nombre %>" />
+
+    </a>
+    <div class="producto-info">
+      <p class="precio">S/ <%= Number(producto.precio).toFixed(2) %></p>
+      <p class="nombre"><%= producto.nombre %></p>
+      <p class="marca">Marca: Forestal Santa Blanca</p> <!-- Cambia o elimina según tu base de datos -->
+    </div>
+  </div>
+<% }) %>
+
+    </div>
+  </section>
+
+   <section class="liquidacion">
+    <h2>Liquidación</h2>
+    <div class="productos">
+
+      <div class="producto-card">
+        <a href="#"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/12.00</p>
+          <p class="nombre">Pino Radiata S4S<br>Grado Mueble</p>
+          <p class="marca">Forestal Santa Blanca</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera2.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/30.00</p>
+          <p class="nombre">Melamina Chiavenna</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera3.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/25.00</p>
+          <p class="nombre">Melamina Entablado Natural</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+      <div class="producto-card">
+        <a href=""><img src="../img/madera4.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/26.00</p>
+          <p class="nombre">Melamina Roble Negro</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+       <div class="producto-card">
+        <a href=""><img src="../img/madera5.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/28.00</p>
+          <p class="nombre">Melamina Roble Canela</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+       <div class="producto-card">
+        <a href=""><img src="../img/madera6.jpg" alt="Pino Radiata" /></a>
+        <div class="producto-info">
+          <p class="precio">S/30.00</p>
+          <p class="nombre">Melamina Sonoma Eiche</p>
+          <p class="marca">Tableros Hispanos</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+<section id="nosotros" class="nosotros-section">
+  <div class="nosotros-container">
+    <h1>Nosotros</h1>
+    <div class="nosotros-content">
+      <div class="nosotros-text">
+<p>
+  En MARTIN REPRESENTACIONES, somos una empresa peruana especializada en la venta de materia prima y suministros para carpintería y diseño de interiores. Ofrecemos productos de calidad como melamina, madera, triplay, tapacantos, herramientas y más, trabajando con marcas confiables para garantizar los mejores resultados.
+
+Nos enfocamos en brindar un servicio cercano, ágil y personalizado, con el objetivo de ser aliados estratégicos en cada proyecto. Valoramos la confianza de nuestros clientes y nos comprometemos a ofrecer soluciones eficientes, duraderas y adaptadas a sus necesidades.
+</p>     
+</div>
+      <div class="nosotros-image">
+        <img src="../img/Fondo.png" alt="Imagen descriptiva de la empresa" class="nosotrosIMG">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<footer id="contacto" class="footer">
+  <div class="footer-container">
+      <h1 class="brand-name">MARTIN</h1>
+
+    <div class="footer-columns">
+      <div class="footer-column">
+        <h2>Nosotros</h2>
+        <ul>
+          <li>La empresa</li>
+          <li>Nuestras tiendas</li>
+          <li>Ventas corporativas</li>
+          <li>Trabaja con nosotros</li>
+          <li>Política SIG</li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h2>Legales</h2>
+        <ul>
+          <li>Políticas de privacidad</li>
+          <li>Términos y condiciones</li>
+          <li>Política de Modelo de prevención</li>
+          <li>Política Anticorrupción</li>
+          <li>Política de Lavado de Activo y terrorismo</li>
+          <li>Política de Prevención de Delitos Tributarios y Contables</li>
+          <li>Política de Prevención de Delitos Aduaneros</li>
+          <li>Canal de Denuncias</li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h2>Contáctanos</h2>
+        <ul>
+          <li>Email: ventas@martin.com.pe</li>
+          <li>01-2171300</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>Todos los derechos reservados - Representaciones Martín S.A.C. 2020</p>
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../js/SesionInit.js"></script>
+
+
+</body>
+</html>

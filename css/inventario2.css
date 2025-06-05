@@ -1,0 +1,99 @@
+/* Barra superior */
+.barra-top {
+  background-color: #0069d9;
+  padding: 10px;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Encabezado */
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 30px;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Logo */
+.logo img {
+  height: 50px;
+}
+
+/* Barra de búsqueda */
+.search-bar {
+  position: relative;
+  width: 50%;
+  max-width: 450px;
+}
+
+.search-bar input {
+  width: 100%;
+  border: 1px solid #0069d9;
+  border-radius: 25px;
+  padding: 10px 45px 10px 20px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.search-bar input:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 8px rgba(0, 105, 217, 0.5);
+}
+
+/* Icono de búsqueda dentro de la barra */
+.search-bar i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0069d9;
+  font-size: 16px;
+}
+
+/* Botón Agregar */
+.boton-superior {
+  background-color: #0069d9;
+  border: none;
+  color: white;
+  font-weight: 700;
+  border-radius: 25px;
+  padding: 10px 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.boton-superior a {
+  color: white;           /* Letra blanca */
+  text-decoration: none;  /* Quita el subrayado */
+}
+
+.boton-superior:hover {
+  background-color: #0056b3;
+}
+
+/* Estilos para tabla */
+.table thead th {
+  background-color: #0069d9;
+  color: white;
+  text-align: center;
+  font-weight: 700;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.text-center a {
+  margin: 0 5px;
+}
+
+/* Modal botón cerrar */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
