@@ -60,8 +60,8 @@
       <div class="card-producto-header">
         <h1 class="card-producto-titulo"><%= producto.nombre %></h1>
         <p class="card-producto-stock">
-      Stock disponible: <%= producto.stock %> unidades
-      </p>
+        Stock disponible: <%= producto.stock %> unidades
+        </p>
         <p class="card-producto-descripcion"><%= producto.descripcion %></p>
       </div>
 
@@ -71,7 +71,6 @@
         <h2 class="card-subtitulo">Cantidad</h2>
         <div class="card-contador">
           <button class="card-btn-contador" id="decrease-btn" type="button">-</button>
-<!-- En algún lugar dentro de tu HTML renderizado -->
           <span id="quantity" data-stock="<%= producto.stock %>">1</span>
 
           <button class="card-btn-contador" id="increase-btn" type="button">+</button>
@@ -333,13 +332,26 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // Elementos de cantidad
   const decreaseBtn = document.getElementById('decrease-btn');
   const increaseBtn = document.getElementById('increase-btn');
   const qtyEl       = document.getElementById('quantity');
   const totalEl     = document.getElementById('total-price');
 
+  // Botones de acción
+  const addToCartBtn = document.getElementById('add-to-cart-btn');
+  const buyNowBtn    = document.getElementById('buy-now-btn');
+  const productoIdEl = document.getElementById('producto-id');
+
+  // Validación de existencia
+  if (!decreaseBtn || !increaseBtn || !qtyEl || !totalEl || !productoIdEl) {
+    console.error('❌ Elementos necesarios no encontrados en el DOM.');
+    return;
+  }
+
   const unitPrice = parseFloat(totalEl.dataset.unitPrice);
   const stockDisponible = parseInt(qtyEl.dataset.stock, 10);
+  const productoId = parseInt(productoIdEl.value, 10);
 
   function updateTotal() {
     const qty = parseInt(qtyEl.textContent, 10);
@@ -372,56 +384,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Inicializar estado de botones al cargar
+  addToCartBtn?.addEventListener('click', () => {
+    const cantidad = parseInt(qtyEl.textContent, 10);
+    fetch('/carrito/agregar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productoId, cantidad })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert('Producto añadido al carrito');
+    })
+    .catch(error => {
+      console.error('Error al añadir al carrito:', error);
+    });
+  });
+
+  buyNowBtn?.addEventListener('click', () => {
+    const cantidad = parseInt(qtyEl.textContent, 10);
+    fetch('/carrito/agregar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productoId, cantidad })
+    })
+    .then(res => res.json())
+    .then(data => {
+      window.location.href = '/carrito';
+    })
+    .catch(error => {
+      console.error('Error al procesar la compra:', error);
+    });
+  });
+
+  // Estado inicial
   updateButtons(parseInt(qtyEl.textContent, 10));
 });
 
-
-
-  const addToCartBtn = document.getElementById('add-to-cart-btn');
-const buyNowBtn = document.getElementById('buy-now-btn');
-const quantityElement = document.getElementById('quantity');
-const productoId = parseInt(document.getElementById('producto-id').value); // ID como número
-
-// Añadir al carrito sin redirigir
-addToCartBtn.addEventListener('click', () => {
-  const cantidad = parseInt(quantityElement.textContent);
-
-  fetch('/carrito/agregar', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ productoId, cantidad })
-  })
-  .then(res => res.json())
-  .then(data => {
-    alert('Producto añadido al carrito');
-  })
-  .catch(error => {
-    console.error('Error al añadir al carrito:', error);
-  });
-});
-
-// Comprar y redirigir al carrito
-buyNowBtn.addEventListener('click', () => {
-  const cantidad = parseInt(quantityElement.textContent);
-
-  fetch('/carrito/agregar', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ productoId, cantidad })
-  })
-  .then(res => res.json())
-  .then(data => {
-    window.location.href = '/carrito';
-  })
-  .catch(error => {
-    console.error('Error al procesar la compra:', error);
-  });
-});
 
 </script>
 

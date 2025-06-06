@@ -506,6 +506,12 @@ app.post(
     try {
       await conn.beginTransaction();
 
+      // 🔍 Validar stock antes de insertar pedido
+      for (const it of items) {
+        if (it.stock < it.cantidad) {
+          throw new Error(`Stock insuficiente para "${it.nombre}". Stock disponible: ${it.stock}`);
+        }
+      }
 
       // 1) Insertar en Pedido
       const [pedidoResult] = await conn.query(
