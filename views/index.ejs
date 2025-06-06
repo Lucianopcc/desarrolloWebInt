@@ -62,19 +62,25 @@
     <h2>Los más vendidos</h2>
     <div class="productos">
 
-     <% productos.forEach(producto => { %>
+   <% productos.forEach(producto => { %>
   <div class="producto-card">
     <a href="/producto/<%= producto.id_producto %>">
-      <img src="<%= producto.imagen %>" alt="<%= producto.nombre %>" />
+      <div class="imagen-con-alerta">
+        <img src="<%= producto.imagen %>" alt="<%= producto.nombre %>" />
 
+        <% if (producto.stock <= 7) { %>
+          <span class="alerta-stock">¡POCAS UNIDADES!</span>
+        <% } %>
+      </div>
     </a>
+
     <div class="producto-info">
       <p class="precio">S/ <%= Number(producto.precio).toFixed(2) %></p>
       <p class="nombre"><%= producto.nombre %></p>
-      
     </div>
   </div>
 <% }) %>
+
 
     </div>
   </section>
