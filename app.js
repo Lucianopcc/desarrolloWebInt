@@ -124,7 +124,7 @@ app.post('/login', async (req, res) => {
 /* ========= PÁGINAS ========= */
 app.get('/', async (req, res) => {
   try {
-    const [productos] = await pool.query('SELECT * FROM producto');
+    const [productos] = await pool.query('SELECT * FROM producto WHERE estado = 1');
     res.render('index', { productos });
   } catch (err) {
     console.error(err);
