@@ -27,8 +27,18 @@ const cargarProductos = () => {
 // Mostrar productos en tabla
 const mostrar = (productos) => {
   resultados = '';
+
+  // Ordenar: primero los que tienen stock <= 7
+  productos.sort((a, b) => {
+    // Si a tiene stock bajo y b no, que a vaya antes (retorna -1)
+    if (a.stock <= 7 && b.stock > 7) return -1;
+    if (a.stock > 7 && b.stock <= 7) return 1;
+    return 0; // si ambos tienen igual condición, no cambia el orden
+  });
+
   productos.forEach(producto => {
-    resultados += `<tr>
+    const claseStock = producto.stock <= 7 ? 'stock-bajo' : '';
+    resultados += `<tr class="${claseStock}">
       <td>${producto.id_producto}</td>
       <td>${producto.nombre}</td>
       <td>${producto.descripcion}</td>
@@ -42,8 +52,10 @@ const mostrar = (productos) => {
       </td>
     </tr>`;
   });
+
   contenedor.innerHTML = resultados;
 };
+
 
 // Evento para abrir modal de crear
 btnCrear.addEventListener('click', () => {
