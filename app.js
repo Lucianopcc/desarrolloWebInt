@@ -189,7 +189,8 @@ app.post('/api/producto', upload.single('imagen'), async (req, res) => {
 app.post('/api/producto/:id', upload.single('imagen'), async (req, res) => {
   const id = req.params.id;
   const { nombre, descripcion, precio, stock, id_proveedor } = req.body;
-  const imagen = req.file ? req.file.path : req.body.imagen;
+  const imagen = req.file ? req.file.path : req.body.imagen_actual;
+
 
   try {
     const sql = `

@@ -104,8 +104,11 @@ on(document, 'click', '.btnEditar', e => {
   stock.value = fila.children[4].textContent;
   id_proveedor.value = fila.children[5].textContent;
 
-  // NOTA: no se puede rellenar un input type="file" con JavaScript.
-  // El usuario tendrá que subir otra imagen si quiere reemplazarla.
+
+
+ // Guardar la URL de la imagen actual en el campo oculto
+  const urlImagen = fila.children[6].querySelector('img').getAttribute('src');
+  document.getElementById('imagen_actual').value = urlImagen;
 
   opcion = 'editar';
   modalProducto.show();
