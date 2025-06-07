@@ -69,17 +69,22 @@ pool.getConnection()
   });
 
 /* ========= REGISTRO ========= */
+const bcrypt = require('bcrypt');
+
 app.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10); // el 10 es el “coste”
+
   const sql = 'INSERT INTO Cliente (nombre, email, contraseña) VALUES (?, ?, ?)';
   try {
-    await pool.query(sql, [name, email, password]);
+    await pool.query(sql, [name, email, hashedPassword]);
     res.redirect('/login.html?registro=ok');
   } catch (err) {
     console.error(err);
     res.send('Error: correo duplicado o problema en el registro');
   }
 });
+
 
 
 /* ========= LOGIN ========= */
@@ -93,25 +98,28 @@ app.post('/login', async (req, res) => {
     return res.json({ status: 'ok', nombre: 'Administrador', rol: 'admin' });
   }
 
-  const sql = 'SELECT id_cliente, nombre FROM Cliente WHERE email = ? AND contraseña = ?';
+  const sql = 'SELECT id_cliente, nombre, contraseña FROM Cliente WHERE email = ?';
   try {
-    const [results] = await pool.query(sql, [email, password]);
+    const [results] = await pool.query(sql, [email]);
+
     if (results.length > 0) {
-      // Guardamos en sesión
-      req.session.user = {
-        id_cliente: results[0].id_cliente,
-        nombre: results[0].nombre,
-        rol: 'cliente'
-      };
-      return res.json({ status: 'ok', nombre: results[0].nombre, rol: 'cliente' });
-    } else {
-      return res.json({ status: 'fail', message: 'Correo o contraseña incorrectos' });
+      const match = await bcrypt.compare(password, results[0].contraseña);
+      if (match) {
+        req.session.user = {
+          id_cliente: results[0].id_cliente,
+          nombre: results[0].nombre,
+          rol: 'cliente'
+        };
+        return res.json({ status: 'ok', nombre: results[0].nombre, rol: 'cliente' });
+      }
     }
+    return res.json({ status: 'fail', message: 'Correo o contraseña incorrectos' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: 'error', message: 'Error del servidor' });
   }
 });
+
 
 /* ========= PÁGINAS ========= */
 app.get('/', async (req, res) => {
