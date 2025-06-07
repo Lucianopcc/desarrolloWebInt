@@ -149,13 +149,14 @@ app.get('/producto/:id', async (req, res) => {
 // Obtener todos los productos
 app.get('/api/producto', async (req, res) => {
   try {
-    const [productos] = await pool.query('SELECT * FROM producto');
-    res.json(productos);
+    const [result] = await pool.query('SELECT * FROM producto WHERE estado = 1');
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al obtener productos' });
   }
 });
+
 
 // Obtener un producto por ID
 app.get('/api/producto/:id', async (req, res) => {
@@ -208,17 +209,18 @@ app.post('/api/producto/:id', upload.single('imagen'), async (req, res) => {
   }
 });
 
-// Eliminar producto
+// Apagar (desactivar) producto en lugar de eliminar
 app.delete('/api/producto/:id', async (req, res) => {
   try {
-    const sql = 'DELETE FROM producto WHERE id_producto = ?';
+    const sql = 'UPDATE producto SET estado = 0 WHERE id_producto = ?';
     const [result] = await pool.query(sql, [req.params.id]);
-    res.json({ mensaje: 'Producto eliminado', result });
+    res.json({ mensaje: 'Producto desactivado correctamente', result });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Error al eliminar producto' });
+    res.status(500).json({ error: 'Error al desactivar producto' });
   }
 });
+
 
 /* ========= API CRUD PROVEEDORES ========= */
 
