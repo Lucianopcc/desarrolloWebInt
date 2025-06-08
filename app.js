@@ -149,7 +149,21 @@ app.get('/producto/:id', async (req, res) => {
 // Obtener todos los productos
 app.get('/api/producto', async (req, res) => {
   try {
-    const [result] = await pool.query('SELECT * FROM producto WHERE estado = 1');
+    const [result] = await pool.query(`
+  SELECT 
+    p.id_producto,
+    p.nombre,
+    p.descripcion,
+    p.precio,
+    p.stock,
+    c.nombre AS nombre_categoria,
+    p.id_proveedor,
+    p.imagen
+  FROM producto p
+  JOIN categoria c ON p.id_categoria = c.id_categoria
+  WHERE p.estado = 1
+`);
+
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -172,12 +186,15 @@ app.get('/api/producto/:id', async (req, res) => {
 
 // Crear producto
 app.post('/api/producto', upload.single('imagen'), async (req, res) => {
-  const { nombre, descripcion, precio, stock, id_proveedor } = req.body;
+  const { nombre, descripcion, precio, stock, id_proveedor, id_categoria } = req.body;
+
   try {
     const imagenUrl = req.file?.path || '';
-    const sql = 'INSERT INTO producto (nombre, descripcion, precio, stock, imagen, id_proveedor) VALUES (?, ?, ?, ?, ?, ?)';
+    const sql = 'INSERT INTO producto (nombre, descripcion, precio, stock, imagen, id_proveedor, id_categoria) VALUES (?, ?, ?, ?, ?, ?, ?)';
+
     const [result] = await pool.query(sql, [
-      nombre, descripcion, parseFloat(precio), parseInt(stock), imagenUrl, parseInt(id_proveedor)
+      nombre, descripcion, parseFloat(precio), parseInt(stock), imagenUrl, parseInt(id_proveedor), parseInt(id_categoria)
+
     ]);
     res.json({ mensaje: 'Producto creado', id_producto: result.insertId });
   } catch (err) {
@@ -189,19 +206,21 @@ app.post('/api/producto', upload.single('imagen'), async (req, res) => {
 // Actualizar producto
 app.post('/api/producto/:id', upload.single('imagen'), async (req, res) => {
   const id = req.params.id;
-  const { nombre, descripcion, precio, stock, id_proveedor } = req.body;
+  const { nombre, descripcion, precio, stock, id_proveedor, id_categoria } = req.body;
+
   const imagen = req.file ? req.file.path : req.body.imagen_actual;
 
 
   try {
     const sql = `
-      UPDATE producto 
-      SET nombre = ?, descripcion = ?, precio = ?, stock = ?, imagen = ?, id_proveedor = ?
-      WHERE id_producto = ?
-    `;
-    const [result] = await pool.query(sql, [
-      nombre, descripcion, parseFloat(precio), parseInt(stock), imagen, parseInt(id_proveedor), id
-    ]);
+  UPDATE producto 
+  SET nombre = ?, descripcion = ?, precio = ?, stock = ?, imagen = ?, id_proveedor = ?, id_categoria = ?
+  WHERE id_producto = ?
+`;
+
+    const [result] = await pool.query(sql, 
+      [nombre, descripcion, parseFloat(precio), parseInt(stock), imagen, parseInt(id_proveedor), parseInt(id_categoria), id]
+);
     res.json({ mensaje: 'Producto actualizado', result });
   } catch (err) {
     console.error(err);
@@ -220,6 +239,20 @@ app.delete('/api/producto/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al desactivar producto' });
   }
 });
+
+//obtener categoria
+app.get('/api/categorias', async (req, res) => {
+  try {
+    const [categorias] = await pool.query(
+      'SELECT id_categoria, nombre AS nombre_categoria FROM categoria'
+    );
+    res.json(categorias);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener las categorías' });
+  }
+});
+
 
 
 /* ========= API CRUD PROVEEDORES ========= */

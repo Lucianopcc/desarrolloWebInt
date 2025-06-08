@@ -13,6 +13,8 @@ const id_proveedor = document.getElementById('id_proveedor');
 const imagen = document.getElementById('imagen');
 const btnCrear = document.getElementById('btnCrear');
 
+
+
 let opcion = '';
 let idForm = 0;
 
@@ -44,7 +46,10 @@ const mostrar = (productos) => {
       <td>${producto.descripcion}</td>
       <td>${producto.precio}</td>
       <td>${producto.stock}</td>
+      <td>${producto.nombre_categoria}</td>
+
       <td>${producto.id_proveedor}</td>
+
       <td><img src="${producto.imagen}" width="50" height="50"></td>
       <td class="text-center">
         <a class="btnEditar btn btn-primary">Editar</a>

@@ -70,7 +70,9 @@
             <th>Descripción</th>
             <th>Precio</th>
             <th>Stock</th>
+            <th>Categoria</th>
             <th>Proveedor</th>
+            
             <th>Imagen</th>
             <th>Acciones</th>
           </tr>
@@ -116,6 +118,20 @@
     <label for="stock" class="col-form-label">Stock:</label>
     <input id="stock" name="stock" type="number" class="form-control" />
   </div>
+
+  <div class="mb-3">
+    <label for="categoria" class="col-form-label">Categoria:</label>
+    <select id="id_categoria" name="id_categoria" class="form-control" required>
+    <option value="">Selecciona una categoría</option>
+
+  
+</select>
+
+  </div>
+
+
+
+
   <div class="mb-3">
     <label for="id_proveedor" class="col-form-label">Proveedor:</label>
     <input id="id_proveedor" name="id_proveedor" type="number" class="form-control" />
@@ -168,6 +184,29 @@
           }
         });
       });
+
+
+
+      const selectCategoria = document.getElementById('id_categoria');
+
+const cargarCategorias = async () => {
+  try {
+    const res = await fetch('http://localhost:3000/api/categorias');
+    const data = await res.json();
+
+    selectCategoria.innerHTML = '<option value="">Selecciona una categoría</option>';
+    data.forEach(categoria => {
+      const option = document.createElement('option');
+      option.value = categoria.id_categoria;
+      option.textContent = categoria.nombre_categoria;
+      selectCategoria.appendChild(option);
+    });
+  } catch (err) {
+    console.error('Error cargando categorías:', err);
+  }
+};
+cargarCategorias();
+
     </script>
   </body>
 </html>
