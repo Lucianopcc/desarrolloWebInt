@@ -144,14 +144,55 @@ app.get('/producto/:id', async (req, res) => {
   }
 });
 
-/* ========= FERRETERÍA ========= */
+// LUMINARIA (id_categoria = 1)
+app.get('/luminarias', async (req, res) => {
+  try {
+    const [productos] = await pool.query(
+      'SELECT * FROM producto WHERE id_categoria = 1 AND estado = 1'
+    );
+    res.render('luminarias', { productos });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al cargar Luminaria');
+  }
+});
+
+// PISOS (id_categoria = 2)
+app.get('/pisos', async (req, res) => {
+  try {
+    const [productos] = await pool.query(
+      'SELECT * FROM producto WHERE id_categoria = 2 AND estado = 1'
+    );
+    res.render('pisos', { productos });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al cargar Pisos');
+  }
+});
+
+// TECHOS (id_categoria = 3)
+app.get('/techos', async (req, res) => {
+  try {
+    const [productos] = await pool.query(
+      'SELECT * FROM producto WHERE id_categoria = 3 AND estado = 1'
+    );
+    res.render('techos', { productos });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al cargar Techos');
+  }
+});
+
+// FERRETERÍA (id_categoria = 4)
 app.get('/ferreteria', async (req, res) => {
   try {
-    const [productos] = await pool.query('SELECT * FROM producto WHERE categoria = "ferreteria" AND estado = 1');
+    const [productos] = await pool.query(
+      'SELECT * FROM producto WHERE id_categoria = 4 AND estado = 1'
+    );
     res.render('ferreteria', { productos });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al cargar la página de ferretería');
+    res.status(500).send('Error al cargar Ferretería');
   }
 });
 
