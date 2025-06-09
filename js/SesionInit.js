@@ -56,7 +56,7 @@
 
     } else {
       saludoUsuario.innerHTML = `
-        <a href="login.html">
+        <a href="/login.html">
           <img class="boton-superior" src="../img/usuario.png" alt="Usuario" style="width: 30px;">
         </a>
       `;

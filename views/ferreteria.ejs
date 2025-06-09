@@ -21,7 +21,7 @@
     <div class="buscador">
       <input type="text" placeholder="¿Qué estás buscando?">
     </div>
-<a href="carrito.html">
+<a href="/carrito">
    <img class="boton-superior" href="#" src="../img/carrito.png" alt="Carrito">
 </a>
 <div id="saludo-usuario" class="boton-superior" style="display: flex; align-items: center; gap: 10px;">
@@ -57,7 +57,7 @@
 
   <section class="nosotros-section">
   <div class="nosotros-container">
-    <h1>Luminarias</h1>
+    <h1>Ferretería</h1>
     <div class="nosotros-content">
       <div class="nosotros-text">
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean in felis eget mauris sollicitudin luctus. Praesent maximus egestas arcu, quis tincidunt mauris luctus eget. Morbi gravida, justo et luctus imperdiet, tortor urna finibus arcu, in mattis nisi neque nec ligula. Quisque sit amet pellentesque purus. Etiam facilisis, turpis nec convallis interdum, risus magna varius velit, vitae porttitor enim erat sit amet massa. Phasellus bibendum vestibulum nisi, at faucibus augue varius et. Sed suscipit ac mauris vel malesuada. Morbi tincidunt facilisis dignissim. Curabitur in tristique tellus. Maceenas lorem ligula, tincidunt sit amet erat sed, dapibus hendrerit orci. Vestibulum pulvinar a dolor quis fermentum.</p>
@@ -66,81 +66,31 @@
   </div>
 
 <section class="mas-vendidos">
+    <h2>Los más vendidos</h2>
     <div class="productos">
 
-      <div class="producto-card">
-        <a href="../productos/Pino Radiata.html"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/12.00</p>
-          <p class="nombre">Pino Radiata S4S<br>Grado Mueble</p>
-          <p class="marca">Forestal Santa Blanca</p>
-        </div>
-      </div>
+   <% productos.forEach(producto => { %>
+  <div class="producto-card">
+    <a href="/producto/<%= producto.id_producto %>">
+      <div class="imagen-con-alerta">
+        <img src="<%= producto.imagen %>" alt="<%= producto.nombre %>" />
 
-      <div class="producto-card">
-        <a href=""><img src="../img/madera2.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/30.00</p>
-          <p class="nombre">Melamina Chiavenna</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
+        <% if (producto.stock <= 7) { %>
+          <span class="alerta-stock">¡POCAS UNIDADES!</span>
+        <% } %>
       </div>
+    </a>
 
-      <div class="producto-card">
-        <a href=""><img src="../img/madera3.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/25.00</p>
-          <p class="nombre">Melamina Entablado Natural</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
+    <div class="producto-info">
+      <p class="precio">S/ <%= Number(producto.precio).toFixed(2) %></p>
+      <p class="nombre"><%= producto.nombre %></p>
+    </div>
+  </div>
+<% }) %>
 
-      <div class="producto-card">
-        <a href=""><img src="../img/madera4.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/26.00</p>
-          <p class="nombre">Melamina Roble Negro</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
 
-       <div class="producto-card">
-        <a href=""><img src="../img/madera5.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/28.00</p>
-          <p class="nombre">Melamina Roble Canela</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
-
-       <div class="producto-card">
-        <a href=""><img src="../img/madera6.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/30.00</p>
-          <p class="nombre">Melamina Sonoma Eiche</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
-
-       <div class="productos">
-
-      <div class="producto-card">
-        <a href="#"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/12.00</p>
-          <p class="nombre">Pino Radiata S4S<br>Grado Mueble</p>
-          <p class="marca">Forestal Santa Blanca</p>
-        </div>
-      </div>
-
-      <div class="producto-card">
-        <a href=""><img src="../img/madera2.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/30.00</p>
-          <p class="nombre">Melamina Chiavenna</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
+    </div>
+  </section>
 
       <div class="producto-card">
         <a href=""><img src="../img/madera3.jpg" alt="Pino Radiata" /></a>
@@ -169,14 +119,51 @@
         </div>
       </div>
 
-       <div class="producto-card">
-        <a href=""><img src="../img/madera6.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/30.00</p>
-          <p class="nombre">Melamina Sonoma Eiche</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
+      
+      <div class="producto-card" data-nombre="Pino Radiata S4S Grado Mueble" data-precio="12.00">
+  <a href="../productos/Pino Radiata.html"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
+  <div class="producto-info">
+    <p class="precio">S/12.00</p>
+    <p class="nombre">Pino Radiata S4S<br>Grado Mueble</p>
+    <p class="marca">Forestal Santa Blanca</p>
+    <button class="btn-agregar">Agregar al carrito</button>
+  </div>
+</div>
+
+<div class="producto-card" data-nombre="Pino Radiata S4S Grado Mueble" data-precio="12.00">
+  <a href="../productos/Pino Radiata.html"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
+  <div class="producto-info">
+    <p class="precio">S/10.00</p>
+    <p class="nombre">Pinito Radiata S4S<br>Grado Mueble</p>
+    <p class="marca">Forestal Santa Blanca</p>
+    <button class="btn-agregar">Agregar al carrito</button>
+  </div>
+</div>
+
+
+<div class="producto-card" data-nombre="Pino Radiata S4S Grado Mueble" data-precio="12.00">
+  <a href="../productos/Pino Radiata.html"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
+  <div class="producto-info">
+    <p class="precio">S/15.00</p>
+    <p class="nombre">madera S4S<br>Grado Mueble</p>
+    <p class="marca">Forl Santa Blanca</p>
+    <button class="btn-agregar">Agregar al carrito</button>
+  </div>
+</div>
+
+
+<div class="producto-card" data-nombre="Pino Radiata S4S Grado Mueble" data-precio="12.00">
+  <a href="../productos/Pino Radiata.html"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
+  <div class="producto-info">
+    <p class="precio">S/12¿3.00</p>
+    <p class="nombre">P R S4S<br>Grado Mueble</p>
+    <p class="marca">Forestal Santa Blanca</p>
+    <button class="btn-agregar">Agregar al carrito</button>
+  </div>
+</div>
+
+
+      
 
     </div>
     

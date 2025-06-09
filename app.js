@@ -136,13 +136,25 @@ app.get('/producto/:id', async (req, res) => {
   const id = req.params.id;
   try {
     const [resultados] = await pool.query('SELECT * FROM producto WHERE id_producto = ?', [id]);
-    if (resultados.length === 0) return res.status(404).send('Producto no encontrado');
+    if (resultados.length === 0) return res.status(404).send('no encontrado');
     res.render('producto', { producto: resultados[0] });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error en la base de datos');
   }
 });
+
+/* ========= FERRETERÍA ========= */
+app.get('/ferreteria', async (req, res) => {
+  try {
+    const [productos] = await pool.query('SELECT * FROM producto WHERE categoria = "ferreteria" AND estado = 1');
+    res.render('ferreteria', { productos });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al cargar la página de ferretería');
+  }
+});
+
 
 /* ========= API CRUD PRODUCTOS ========= */
 

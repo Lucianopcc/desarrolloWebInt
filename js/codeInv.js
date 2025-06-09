@@ -18,6 +18,9 @@ const btnCrear = document.getElementById('btnCrear');
 let opcion = '';
 let idForm = 0;
 
+
+
+
 // Cargar todos los productos
 const cargarProductos = () => {
   fetch(url)
@@ -40,22 +43,21 @@ const mostrar = (productos) => {
 
   productos.forEach(producto => {
     const claseStock = producto.stock <= 7 ? 'stock-bajo' : '';
-    resultados += `<tr class="${claseStock}">
-      <td>${producto.id_producto}</td>
-      <td>${producto.nombre}</td>
-      <td>${producto.descripcion}</td>
-      <td>${producto.precio}</td>
-      <td>${producto.stock}</td>
-      <td>${producto.nombre_categoria}</td>
+    resultados += `<tr class="${claseStock}" data-categoria="${producto.id_categoria}">
+  <td>${producto.id_producto}</td>
+  <td>${producto.nombre}</td>
+  <td>${producto.descripcion}</td>
+  <td>${producto.precio}</td>
+  <td>${producto.stock}</td>
+  <td>${producto.nombre_categoria}</td>
+  <td>${producto.id_proveedor}</td>
+  <td><img src="${producto.imagen}" width="50" height="50"></td>
+  <td class="text-center">
+    <a class="btnEditar btn btn-primary">Editar</a>
+    <a class="btnBorrar btn btn-danger">Borrar</a>
+  </td>
+</tr>`;
 
-      <td>${producto.id_proveedor}</td>
-
-      <td><img src="${producto.imagen}" width="50" height="50"></td>
-      <td class="text-center">
-        <a class="btnEditar btn btn-primary">Editar</a>
-        <a class="btnBorrar btn btn-danger">Borrar</a>
-      </td>
-    </tr>`;
   });
 
   contenedor.innerHTML = resultados;
@@ -100,24 +102,27 @@ on(document, 'click', '.btnBorrar', e => {
 
 // Editar producto
 on(document, 'click', '.btnEditar', e => {
-  const fila = e.target.parentNode.parentNode;
+  const fila = e.target.closest('tr');
   idForm = fila.children[0].textContent;
 
-  nombre.value = fila.children[1].textContent;
-  descripcion.value = fila.children[2].textContent;
-  precio.value = fila.children[3].textContent;
-  stock.value = fila.children[4].textContent;
-  id_proveedor.value = fila.children[5].textContent;
+  nombre.value       = fila.children[1].textContent;
+  descripcion.value  = fila.children[2].textContent;
+  precio.value       = fila.children[3].textContent;
+  stock.value        = fila.children[4].textContent;
+  // nombre_categoria está en children[5], pero eso no es el ID
+  id_proveedor.value = fila.children[6].textContent;
 
+  // 1) Cargar id_categoria desde data-categoria
+  id_categoria.value = fila.dataset.categoria;
 
-
- // Guardar la URL de la imagen actual en el campo oculto
-  const urlImagen = fila.children[6].querySelector('img').getAttribute('src');
+  // 2) Ajustar índice de la imagen (ahora está en children[7])
+  const urlImagen = fila.children[7].querySelector('img').getAttribute('src');
   document.getElementById('imagen_actual').value = urlImagen;
 
   opcion = 'editar';
   modalProducto.show();
 });
+
 
 // Crear o editar producto usando FormData
 formProducto.addEventListener('submit', async (e) => {
@@ -151,6 +156,7 @@ formProducto.addEventListener('submit', async (e) => {
     alertify.error('Error al guardar producto');
   }
 });
+
 
 // Cargar productos al iniciar
 cargarProductos();
