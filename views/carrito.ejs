@@ -158,11 +158,12 @@
     <div class="map-container">
       <div id="map"></div>
       <div class="address-form">
-        <select id="district">
-          <option value="" disabled selected>Seleccione un distrito</option>
-        </select>
-        <input type="text" id="address" placeholder="Dirección">
-        <input type="text" id="reference" placeholder="Referencia">
+        <select id="district" required>
+  <option value="" disabled selected>Seleccione un distrito</option>
+</select>
+<input type="text" id="address" placeholder="Dirección" required>
+<input type="text" id="reference" placeholder="Referencia" required>
+
       </div>
     </div>
 
@@ -185,6 +186,8 @@
 <div class="payment-method">
   <h3>Método de pago</h3>
   <p>Seleccione el tipo de pago y cargue la evidencia</p>
+  <input type="hidden" id="metodo_pago" name="metodo_pago" required>
+
 
   <div class="payment-buttons">
     <button class="payment-btn green">Tarjeta débito / crédito</button>
@@ -401,6 +404,74 @@ districtSelect.addEventListener('change', () => {
 
   // Al cargar la página, calcula por primera vez
   document.addEventListener('DOMContentLoaded', actualizarTotalPago);
+
+
+
+
+
+  
+  let metodoSeleccionado = "";
+
+  // Detectar selección de método de pago
+  const paymentButtons = document.querySelectorAll('.payment-btn');
+  const metodoInput = document.getElementById('metodo_pago');
+
+  paymentButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      metodoSeleccionado = button.textContent.trim();
+      metodoInput.value = metodoSeleccionado;
+
+      // Marcar visualmente el botón seleccionado
+      paymentButtons.forEach(btn => btn.classList.remove('seleccionado'));
+      button.classList.add('seleccionado');
+    });
+  });
+
+  // Validar antes de enviar el formulario
+  const formPago = document.querySelector('.payment-method form');
+  formPago.addEventListener('submit', function(e) {
+    const seccionRecojo = document.querySelector('.estilo-recojo');
+    const seccionDelivery = document.querySelector('.estilo-delivery');
+
+    let validado = false;
+
+    // Si la sección visible es delivery
+    if (window.getComputedStyle(seccionDelivery).display !== 'none') {
+      const distrito = document.getElementById('district').value;
+      const direccion = document.getElementById('address').value.trim();
+      const referencia = document.getElementById('reference').value.trim();
+
+      if (distrito && direccion && referencia) {
+        validado = true;
+      } else {
+        alert("Por favor, complete todos los campos de dirección (Delivery).");
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // Si la sección visible es recojo en tienda
+    if (window.getComputedStyle(seccionRecojo).display !== 'none') {
+      const sedeSeleccionada = document.querySelector('input[name="sede"]:checked');
+      if (sedeSeleccionada) {
+        validado = true;
+      } else {
+        alert("Por favor, seleccione una sede para el recojo en tienda.");
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // Verificar método de pago
+    if (!metodoSeleccionado) {
+      alert("Debe seleccionar un método de pago.");
+      e.preventDefault();
+      return;
+    }
+
+    // Si todo está validado correctamente, el formulario se puede enviar
+  });
+
 
 </script>
 

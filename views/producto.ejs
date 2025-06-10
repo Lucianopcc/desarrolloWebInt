@@ -52,9 +52,7 @@
   <div class="card-producto-contenedor">
     <!-- Columna de imagen -->
     <div class="card-producto-columna-imagen">
-      
-
-        <img class="card-producto-imagen" src="<%= producto.imagen %>" alt="<%= producto.nombre %>" />
+      <img class="card-producto-imagen" src="<%= producto.imagen %>" alt="<%= producto.nombre %>" />
     </div>
 
     <!-- Columna de contenido -->
@@ -62,46 +60,84 @@
       <div class="card-producto-header">
         <h1 class="card-producto-titulo"><%= producto.nombre %></h1>
         <p class="card-producto-stock">
-        Stock disponible: <%= producto.stock %> unidades
+          Stock disponible: <%= producto.stock %> unidades
         </p>
         <p class="card-producto-descripcion"><%= producto.descripcion %></p>
       </div>
 
       <hr class="card-producto-divider">
 
-      <div class="card-cantidad">
-        <h2 class="card-subtitulo">Cantidad</h2>
-        <div class="card-contador">
-          <button class="card-btn-contador" id="decrease-btn" type="button">-</button>
-          <span id="quantity" data-stock="<%= producto.stock %>">1</span>
-
-          <button class="card-btn-contador" id="increase-btn" type="button">+</button>
+      <% if (producto.stock > 0) { %>
+        <div class="card-cantidad">
+          <h2 class="card-subtitulo">Cantidad</h2>
+          <div class="card-contador">
+            <button class="card-btn-contador" id="decrease-btn" type="button">-</button>
+            <span id="quantity" data-stock="<%= producto.stock %>">1</span>
+            <button class="card-btn-contador" id="increase-btn" type="button">+</button>
+          </div>
         </div>
-      </div>
 
-      <div class="card-total">
-        <h3 class="card-subtitulo">Total</h3>
-        <span 
-    class="card-precio-total" 
-    id="total-price" 
-    data-unit-price="<%= Number(producto.precio) %>"
-  >
+        <div class="card-total">
+          <h3 class="card-subtitulo">Total</h3>
+          <span 
+            class="card-precio-total" 
+            id="total-price" 
+            data-unit-price="<%= Number(producto.precio) %>"
+          >
+            S/<%= Number(producto.precio).toFixed(2) %>
+          </span>
+        </div>
 
-    S/<%= Number(producto.precio).toFixed(2) %>
-  </span>
+        <hr class="card-producto-divider">
 
-      </div>
+        <div class="card-botones-accion">
+          <input type="hidden" id="producto-id" value="<%= producto.id_producto %>">
+          <button class="card-btn card-btn-secundario" id="add-to-cart-btn" type="button">Añadir al carrito</button>
+          <button class="card-btn card-btn-primario" id="buy-now-btn" type="button">Comprar</button>
+        </div>
 
-      <hr class="card-producto-divider">
-
-      <div class="card-botones-accion">
-        <input type="hidden" id="producto-id" value="<%= producto.id_producto %>">
-        <button class="card-btn card-btn-secundario" id="add-to-cart-btn" type="button">Añadir al carrito</button>
-        <button class="card-btn card-btn-primario" id="buy-now-btn" type="button">Comprar</button>
-      </div>
+      <% } else { %>
+        <div class="card-producto-agotado">
+          <p class="agotado-texto">Producto agotado</p>
+          <button class="btn-notificar" onclick="abrirModal()">Notificarme cuando esté disponible</button>
+        </div>
+      <% } %>
     </div>
   </div>
 </div>
+
+<!-- MODAL -->
+<div id="modalNotificacion" class="modal">
+  <div class="modal-contenido">
+    <span class="modal-cerrar" onclick="cerrarModal()">&times;</span>
+    <h2>Notificarme por WhatsApp</h2>
+    <p>Ingresa tu número para recibir una alerta cuando el producto esté disponible:</p>
+    <form id="formNotificar" method="POST" action="/notificar">
+      <input type="hidden" name="productoId" value="<%= producto.id_producto %>">
+      <input type="text" name="numero" placeholder="Ej: +51987654321" required>
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+</div>
+
+<!-- SCRIPT PARA MODAL -->
+<script>
+  function abrirModal() {
+    document.getElementById("modalNotificacion").style.display = "block";
+  }
+
+  function cerrarModal() {
+    document.getElementById("modalNotificacion").style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById("modalNotificacion");
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+</script>
+
 
 
 

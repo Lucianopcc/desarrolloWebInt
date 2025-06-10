@@ -455,3 +455,7 @@ p {
 .payment-method .complete-btn:hover {
   background-color: #e64a19;
 }
+.payment-btn.seleccionado {
+  border: 2px solid #333;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}

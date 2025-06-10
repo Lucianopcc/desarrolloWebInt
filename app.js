@@ -693,6 +693,74 @@ app.get(
     }
   }
 );
+const PdfPrinter = require("pdfmake");
+const fs = require("fs");
+
+
+const fonts = {
+  Roboto: {
+    normal: path.join(__dirname, "fonts/Roboto-Regular.ttf"),
+    bold: path.join(__dirname, "fonts/Roboto-Bold.ttf"),
+    italics: path.join(__dirname, "fonts/Roboto-Italic.ttf"),
+    bolditalics: path.join(__dirname, "fonts/Roboto-BoldItalic.ttf")
+  }
+};
+
+const printer = new PdfPrinter(fonts);
+
+app.get('/pedido/:id/comprobante', async (req, res) => {
+  const id = req.params.id;
+  const pedido = await obtenerPedidoPorId(id); // Tu lógica para recuperar el pedido
+  const detalles = await obtenerDetallesPedido(id); // Productos
+
+  const docDefinition = {
+    content: [
+      { text: 'Comprobante de Pedido', style: 'header' },
+      { text: `Pedido Nº: ${pedido.id_pedido}` },
+      { text: `Cliente: ${pedido.cliente}` },
+      { text: `Fecha: ${pedido.fecha}` },
+      { text: `Total: S/ ${pedido.total}`, margin: [0, 10, 0, 10] },
+
+      {
+        table: {
+          widths: ['*', 'auto', 'auto', 'auto'],
+          body: [
+            ['Producto', 'Cantidad', 'P. Unitario', 'Subtotal'],
+            ...detalles.map(item => [
+              item.nombre,
+              item.cantidad,
+              `S/ ${item.precio_unitario}`,
+              `S/ ${(item.precio_unitario * item.cantidad).toFixed(2)}`
+            ])
+          ]
+        }
+      },
+
+      { text: `\nMétodo de entrega: ${pedido.tipo_entrega === 'recojo' ? 'Recojo en tienda' : 'Delivery'}` },
+      ...(pedido.tipo_entrega === 'recojo'
+        ? [{ text: `Tienda: ${pedido.sede_recojo}` }]
+        : [
+            { text: `Dirección: ${pedido.direccion}` },
+            { text: `Distrito: ${pedido.distrito}` },
+            { text: `Referencia: ${pedido.referencia}` }
+          ]),
+      { text: `\nMétodo de pago: ${pedido.metodo_pago}` }
+    ],
+    styles: {
+      header: {
+        fontSize: 18,
+        bold: true,
+        margin: [0, 0, 0, 10]
+      }
+    }
+  };
+
+  const pdfDoc = printer.createPdfKitDocument(docDefinition);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=comprobante_${id}.pdf`);
+  pdfDoc.pipe(res);
+  pdfDoc.end();
+});
 
 
 /* ========= INICIAR SERVIDOR ========= */
