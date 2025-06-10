@@ -7,6 +7,7 @@ const cloudinary = require('cloudinary').v2;
 const session = require('express-session');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
+
 const app = express();
 const PORT = 3000;
 
@@ -761,6 +762,58 @@ app.get('/pedido/:id/comprobante', async (req, res) => {
   pdfDoc.pipe(res);
   pdfDoc.end();
 });
+
+
+//twilio
+app.post('/notificar', (req, res) => {
+  const { productoId, clienteId } = req.body; // <- asegúrate de que envías `clienteId` desde el formulario o cliente
+
+  const sql = 'INSERT INTO notificaciones (producto_id, cliente_id, enviado) VALUES (?, ?, FALSE)';
+  pool.query(sql, [productoId, clienteId], (err, result) => {
+    if (err) {
+      console.error('Error al guardar notificación:', err);
+      return res.status(500).send('Error al registrar notificación');
+    }
+
+    res.redirect('/gracias'); // o res.json({ mensaje: 'Registrado correctamente' });
+  });
+});
+
+
+
+const twilioClient = require('./twilioClient'); // ✅ importa tu archivo twilioClient.js
+
+async function enviarNotificaciones(producto_id) {
+  try {
+    // Obtener las notificaciones pendientes
+    const [notificaciones] = await pool.query(
+      `SELECT n.id, c.telefono, p.nombre
+       FROM notificaciones n
+       JOIN cliente c ON n.cliente_id = c.id_cliente
+       JOIN producto p ON n.producto_id = p.id_producto
+       WHERE n.enviado = FALSE AND n.producto_id = ?`,
+      [producto_id]
+    );
+
+    for (let noti of notificaciones) {
+      const mensaje = `¡Hola! El producto "${noti.nombre}" ya está disponible en stock. ¡Puedes comprarlo ahora!`;
+
+      // Enviar mensaje por WhatsApp
+      await twilioClient.messages.create({
+        from: 'whatsapp:+14155238886', // número de Twilio
+        to: `whatsapp:${noti.telefono}`,
+        body: mensaje
+      });
+
+      // Marcar como enviado
+      await pool.query('UPDATE notificaciones SET enviado = TRUE WHERE id = ?', [noti.id]);
+    }
+
+    console.log(`Se enviaron ${notificaciones.length} notificaciones.`);
+  } catch (err) {
+    console.error('Error enviando notificaciones:', err);
+  }
+}
 
 
 /* ========= INICIAR SERVIDOR ========= */

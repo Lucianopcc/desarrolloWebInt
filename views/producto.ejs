@@ -111,14 +111,16 @@
   <div class="modal-contenido">
     <span class="modal-cerrar" onclick="cerrarModal()">&times;</span>
     <h2>Notificarme por WhatsApp</h2>
-    <p>Ingresa tu número para recibir una alerta cuando el producto esté disponible:</p>
+    <p>Recibirás una alerta por WhatsApp cuando el producto esté disponible:</p>
     <form id="formNotificar" method="POST" action="/notificar">
       <input type="hidden" name="productoId" value="<%= producto.id_producto %>">
-      <input type="text" name="numero" placeholder="Ej: +51987654321" required>
+      <input type="hidden" name="clienteId" value="<%= cliente.id_cliente %>">
+      <p><strong>Número registrado:</strong> <%= cliente.telefono %></p>
       <button type="submit">Enviar</button>
     </form>
   </div>
 </div>
+
 
 <!-- SCRIPT PARA MODAL -->
 <script>
@@ -281,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
-
+<script src="../js/twilioClient.js"></script>
 <script src="../js/SesionInit.js"></script>
 
 
