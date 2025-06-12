@@ -10,6 +10,8 @@ const descripcion = document.getElementById('descripcion');
 const precio = document.getElementById('precio');
 const stock = document.getElementById('stock');
 const id_proveedor = document.getElementById('id_proveedor');
+const id_categoria = document.getElementById('id_categoria');
+
 const imagen = document.getElementById('imagen');
 const btnCrear = document.getElementById('btnCrear');
 

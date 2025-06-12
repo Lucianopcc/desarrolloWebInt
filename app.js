@@ -6,6 +6,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const session = require('express-session');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { enviarNotificaciones } = require('./notifications');
 
 
 const app = express();
@@ -94,24 +95,24 @@ app.post('/login', async (req, res) => {
 
   // Admin “harcodeado”
   if (email === 'admin@gmail.com' && password === '1234') {
-    // Guardamos en sesión
-    req.session.user = { id_cliente: 0, nombre: 'Administrador', rol: 'admin' };
+    req.session.user = { id_cliente: 0, nombre: 'Administrador', rol: 'admin', telefono: '51987654321' }; // <-- Añade el teléfono si aplica
     return res.json({ status: 'ok', nombre: 'Administrador', rol: 'admin' });
-  }
+}
 
-  const sql = 'SELECT id_cliente, nombre, contraseña FROM Cliente WHERE email = ?';
-  try {
+  const sql = 'SELECT id_cliente, nombre, contraseña, telefono FROM Cliente WHERE email = ?'; // <-- ¡Añade 'telefono' a la selección!
+try {
     const [results] = await pool.query(sql, [email]);
 
     if (results.length > 0) {
-      const match = await bcrypt.compare(password, results[0].contraseña);
-      if (match) {
-        req.session.user = {
-          id_cliente: results[0].id_cliente,
-          nombre: results[0].nombre,
-          rol: 'cliente'
-        };
-        return res.json({ status: 'ok', nombre: results[0].nombre, rol: 'cliente' });
+        const match = await bcrypt.compare(password, results[0].contraseña);
+        if (match) {
+            req.session.user = {
+                id_cliente: results[0].id_cliente,
+                nombre: results[0].nombre,
+                rol: 'cliente',
+                telefono: results[0].telefono // <-- ¡Añade el teléfono aquí!
+            };
+            return res.json({ status: 'ok', nombre: results[0].nombre, rol: 'cliente' });
       }
     }
     return res.json({ status: 'fail', message: 'Correo o contraseña incorrectos' });
@@ -138,7 +139,46 @@ app.get('/producto/:id', async (req, res) => {
   try {
     const [resultados] = await pool.query('SELECT * FROM producto WHERE id_producto = ?', [id]);
     if (resultados.length === 0) return res.status(404).send('no encontrado');
-    res.render('producto', { producto: resultados[0] });
+
+    const producto = resultados[0];
+
+    // --- INICIO: Código NUEVO para manejar el objeto 'cliente' ---
+    let cliente = null; // Inicializamos cliente como null
+
+    // IMPORTANTE: Necesitas decidir cómo obtener los datos del cliente.
+    // La forma más común es si el usuario ha iniciado sesión.
+    // Si usas un sistema de autenticación basado en sesiones (como Passport.js),
+    // los datos del usuario suelen estar disponibles en `req.user` después de un inicio de sesión exitoso.
+    // Adapta esta parte según cómo esté configurada tu autenticación.
+
+    // Ejemplo si tienes un usuario autenticado a través de Passport.js o similar,
+    // y asumiendo que `req.user` contiene `id_cliente` y `telefono`.
+    if (req.isAuthenticated && req.isAuthenticated()) { // O una verificación personalizada como `req.session.userId`
+      // Aquí, idealmente, deberías obtener los datos completos del cliente de tu base de datos
+      // usando el ID del usuario logueado (por ejemplo, `req.user.id`).
+      // Por simplicidad, asumiremos que `req.user` ya tiene `id_cliente` y `telefono`.
+      cliente = {
+        id_cliente: req.user.id_cliente, // Asegúrate de que req.user tenga esta propiedad
+        telefono: req.user.telefono      // Asegúrate de que req.user tenga esta propiedad
+      };
+    } else {
+      // Si ningún usuario ha iniciado sesión, o sus datos no están directamente disponibles,
+      // proporciona un objeto cliente por defecto/vacío para evitar errores de EJS.
+      // Ten en cuenta que el formulario de notificación podría no funcionar correctamente
+      // si `id_cliente` es nulo.
+      cliente = {
+        id_cliente: null,
+        telefono: 'No registrado (requiere iniciar sesión)' // Mensaje para el usuario
+      };
+      // También podrías considerar redirigir a los usuarios no autenticados a una página de inicio de sesión
+      // si las notificaciones solo son para usuarios logueados:
+      // return res.redirect('/login');
+    }
+    // --- FIN: Código NUEVO para manejar el objeto 'cliente' ---
+
+    // Pasa tanto 'producto' como 'cliente' a la plantilla EJS
+    res.render('producto', { producto: producto, cliente: cliente });
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Error en la base de datos');
@@ -205,17 +245,19 @@ app.get('/api/producto', async (req, res) => {
   try {
     const [result] = await pool.query(`
   SELECT 
-    p.id_producto,
-    p.nombre,
-    p.descripcion,
-    p.precio,
-    p.stock,
-    c.nombre AS nombre_categoria,
-    p.id_proveedor,
-    p.imagen
-  FROM producto p
-  JOIN categoria c ON p.id_categoria = c.id_categoria
-  WHERE p.estado = 1
+  p.id_producto,
+  p.nombre,
+  p.descripcion,
+  p.precio,
+  p.stock,
+  p.id_categoria,  -- <-- AÑADE ESTA LÍNEA
+  c.nombre AS nombre_categoria,
+  p.id_proveedor,
+  p.imagen
+FROM producto p
+JOIN categoria c ON p.id_categoria = c.id_categoria
+WHERE p.estado = 1
+
 `);
 
     res.json(result);
@@ -260,22 +302,42 @@ app.post('/api/producto', upload.single('imagen'), async (req, res) => {
 // Actualizar producto
 app.post('/api/producto/:id', upload.single('imagen'), async (req, res) => {
   const id = req.params.id;
-  const { nombre, descripcion, precio, stock, id_proveedor, id_categoria } = req.body;
-
-  const imagen = req.file ? req.file.path : req.body.imagen_actual;
-
+  const { nombre, descripcion, precio, stock, id_proveedor, id_categoria, imagen_actual } = req.body;
+  const imagen = req.file ? req.file.path : imagen_actual;
 
   try {
-    const sql = `
-  UPDATE producto 
-  SET nombre = ?, descripcion = ?, precio = ?, stock = ?, imagen = ?, id_proveedor = ?, id_categoria = ?
-  WHERE id_producto = ?
-`;
+    // 1. Leer stock actual
+    const [rows] = await pool.query(
+      'SELECT stock FROM producto WHERE id_producto = ?',
+      [id]
+    );
+    const oldStock = rows.length ? rows[0].stock : 0;
+    const newStock = parseInt(stock, 10);
 
-    const [result] = await pool.query(sql, 
-      [nombre, descripcion, parseFloat(precio), parseInt(stock), imagen, parseInt(id_proveedor), parseInt(id_categoria), id]
-);
-    res.json({ mensaje: 'Producto actualizado', result });
+    // 2. Actualizar producto
+    await pool.query(
+      `UPDATE producto
+       SET nombre = ?, descripcion = ?, precio = ?, stock = ?, imagen = ?, id_proveedor = ?, id_categoria = ?
+       WHERE id_producto = ?`,
+      [
+        nombre,
+        descripcion,
+        parseFloat(precio),
+        newStock,
+        imagen,
+        parseInt(id_proveedor, 10),
+        parseInt(id_categoria, 10),
+        id
+      ]
+    );
+
+    // 3. Disparar notificaciones si subió de 0 a >0
+    if (oldStock === 0 && newStock > 0) {
+      console.log(`Stock pasó de 0 a ${newStock} para producto ${id}, enviando notificaciones…`);
+      await enviarNotificaciones(id);
+    }
+
+    res.json({ mensaje: 'Producto actualizado correctamente' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al actualizar producto' });
@@ -764,56 +826,8 @@ app.get('/pedido/:id/comprobante', async (req, res) => {
 });
 
 
-//twilio
-app.post('/notificar', (req, res) => {
-  const { productoId, clienteId } = req.body; // <- asegúrate de que envías `clienteId` desde el formulario o cliente
-
-  const sql = 'INSERT INTO notificaciones (producto_id, cliente_id, enviado) VALUES (?, ?, FALSE)';
-  pool.query(sql, [productoId, clienteId], (err, result) => {
-    if (err) {
-      console.error('Error al guardar notificación:', err);
-      return res.status(500).send('Error al registrar notificación');
-    }
-
-    res.redirect('/gracias'); // o res.json({ mensaje: 'Registrado correctamente' });
-  });
-});
 
 
-
-const twilioClient = require('./twilioClient'); // ✅ importa tu archivo twilioClient.js
-
-async function enviarNotificaciones(producto_id) {
-  try {
-    // Obtener las notificaciones pendientes
-    const [notificaciones] = await pool.query(
-      `SELECT n.id, c.telefono, p.nombre
-       FROM notificaciones n
-       JOIN cliente c ON n.cliente_id = c.id_cliente
-       JOIN producto p ON n.producto_id = p.id_producto
-       WHERE n.enviado = FALSE AND n.producto_id = ?`,
-      [producto_id]
-    );
-
-    for (let noti of notificaciones) {
-      const mensaje = `¡Hola! El producto "${noti.nombre}" ya está disponible en stock. ¡Puedes comprarlo ahora!`;
-
-      // Enviar mensaje por WhatsApp
-      await twilioClient.messages.create({
-        from: 'whatsapp:+14155238886', // número de Twilio
-        to: `whatsapp:${noti.telefono}`,
-        body: mensaje
-      });
-
-      // Marcar como enviado
-      await pool.query('UPDATE notificaciones SET enviado = TRUE WHERE id = ?', [noti.id]);
-    }
-
-    console.log(`Se enviaron ${notificaciones.length} notificaciones.`);
-  } catch (err) {
-    console.error('Error enviando notificaciones:', err);
-  }
-}
 
 
 /* ========= INICIAR SERVIDOR ========= */

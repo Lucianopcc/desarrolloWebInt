@@ -44,7 +44,7 @@
 
       document.getElementById('cerrar-sesion').addEventListener('click', () => {
         localStorage.removeItem('nombreUsuario');
-        window.location.href = 'login.html';
+        window.location.href = '/login.html';
       });
 
       document.addEventListener('click', (event) => {
