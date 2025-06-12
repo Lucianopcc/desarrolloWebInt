@@ -116,8 +116,8 @@
   </section>
 
   <div class="contenedor-botones" style="text-align: center; margin-top: 20px;">
-  <button onclick="mostrarSeccion('estilo-recojo')">Recojo en tienda</button>
-  <button onclick="mostrarSeccion('estilo-delivery')">Delivery</button>
+ <button onclick="seleccionarMetodoEntrega('delivery')">Delivery</button>
+<button onclick="seleccionarMetodoEntrega('recoger')">Recojo en tienda</button>
 </div>
 
   <section class="estilo-recojo">
@@ -186,29 +186,30 @@
 <div class="payment-method">
   <h3>Método de pago</h3>
   <p>Seleccione el tipo de pago y cargue la evidencia</p>
-  <input type="hidden" id="metodo_pago" name="metodo_pago" required>
-
-
-  <div class="payment-buttons">
-    <button class="payment-btn green">Tarjeta débito / crédito</button>
-    <button class="payment-btn purple">Yape</button>
-    <button class="payment-btn teal">Plin</button>
-    <button class="payment-btn yellow">Pago Efectivo</button>
-  </div>
-
-  <!-- AQUI VA EL NUEVO CONTENEDOR -->
-  <div class="image-container"></div>
-
- <form action="/carrito/pagar" method="POST">
-  <button type="submit" class="complete-btn">Pagar</button>
-</form>
-
-</div>
-
   
 
 
-    
+ <div class="payment-buttons">
+  <button class="payment-btn green" onclick="seleccionarMetodoPago('tarjeta')">Tarjeta débito / crédito</button>
+  <button class="payment-btn purple" onclick="seleccionarMetodoPago('yape')">Yape</button>
+  <button class="payment-btn teal" onclick="seleccionarMetodoPago('plin')">Plin</button>
+  <button class="payment-btn yellow" onclick="seleccionarMetodoPago('efectivo')">Pago Efectivo</button>
+</div>
+
+
+  
+
+  <!-- AQUI VA EL NUEVO CONTENEDOR -->
+  <div class="image-container"></div>
+<form action="/carrito/pagar" method="POST">
+  <input type="hidden" name="metodo_entrega" id="metodo_entrega" value="recoger">
+  <input type="hidden" name="metodo_pago" id="metodo_pago" required> <!-- MOVIDO AQUÍ -->
+
+  <button type="submit" class="complete-btn">Pagar</button>
+</form>
+
+
+</div>
 
 
 
@@ -259,6 +260,15 @@
 
 
 <script>
+
+   function seleccionarMetodoEntrega(metodo) {
+    document.getElementById('metodo_entrega').value = metodo;
+    mostrarSeccion(metodo === 'delivery' ? 'estilo-delivery' : 'estilo-recojo');
+  }
+
+    function seleccionarMetodoPago(metodo) {
+    document.getElementById('metodo_pago').value = metodo;
+  }
   // 1. Referencias a elementos
   const buttons = document.querySelectorAll('.payment-btn');
   const displayContainer = document.querySelector('.image-container');
@@ -472,6 +482,18 @@ districtSelect.addEventListener('change', () => {
     // Si todo está validado correctamente, el formulario se puede enviar
   });
 
+//validar entrega
+  function seleccionarEntrega(tipo) {
+    // actualiza el valor del hidden
+    document.getElementById('input_metodo_entrega').value = tipo;
+    // opcional: feedback visual
+    alert('Has elegido: ' + (tipo === 'delivery' ? 'Delivery' : 'Recojo en tienda'));
+  }
+
+  function seleccionarPago(metodo) {
+    document.getElementById('input_metodo_pago').value = metodo;
+    alert('Has elegido: ' + metodo);
+  }
 
 </script>
 

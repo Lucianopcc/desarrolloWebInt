@@ -5,8 +5,11 @@ const body = require('body-parser');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const session = require('express-session');
+const puppeteer = require('puppeteer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const { enviarNotificaciones } = require('./notifications');
+const ejs = require('ejs'); // <-- ESTA LÍNEA ES OBLIGATORIA si usas ejs.renderFile
+
 
 
 const app = express();
@@ -638,15 +641,16 @@ app.post(
 
 
 // ——————————————
+// ——————————————
 //  RUTAS DE PAGO PERSISTENTE EN BD
 // ——————————————
 
-// 1) Procesar el pago leyendo el carrito desde la BD
 app.post(
   '/carrito/pagar',
   asegurarCliente, // middleware que valida req.session.user.id_cliente
   async (req, res) => {
     const id_cliente = req.session.user.id_cliente;
+    const { metodo_entrega, metodo_pago } = req.body;
 
     // Obtener el carrito activo
     const [cartRows] = await pool.query(
@@ -679,28 +683,27 @@ app.post(
     try {
       await conn.beginTransaction();
 
-      // 🔍 Validar stock antes de insertar pedido
+      // Validar stock
       for (const it of items) {
         if (it.stock < it.cantidad) {
           throw new Error(`Stock insuficiente para "${it.nombre}". Stock disponible: ${it.stock}`);
         }
       }
 
-      // 1) Insertar en Pedido
+      // Insertar pedido
       const [pedidoResult] = await conn.query(
         'INSERT INTO Pedido (id_cliente, total) VALUES (?, ?)',
         [id_cliente, total]
       );
       const id_pedido = pedidoResult.insertId;
 
-      // 2) Insertar en Detalle_Pedido y actualizar stock
+      // Insertar detalle pedido y actualizar stock
       const detalleSql = `
         INSERT INTO detallepedido 
           (id_pedido, id_producto, cantidad, precio_unitario)
         VALUES (?, ?, ?, ?)
       `;
       for (const it of items) {
-        // Insertar detalle del pedido
         await conn.query(detalleSql, [
           id_pedido,
           it.id_producto,
@@ -708,14 +711,13 @@ app.post(
           it.precio
         ]);
 
-        // Actualizar stock del producto
         await conn.query(
           `UPDATE producto SET stock = stock - ? WHERE id_producto = ?`,
           [it.cantidad, it.id_producto]
         );
       }
 
-      // 3) Vaciar el carrito en la base de datos
+      // Vaciar carrito
       await conn.query(
         'DELETE FROM detallecarrito WHERE id_carrito = ?',
         [id_carrito]
@@ -723,8 +725,13 @@ app.post(
 
       await conn.commit();
 
-      // Redirigir a confirmación
-      res.redirect(`/pedido/${id_pedido}`);
+      // Redirigir a la confirmación del pedido
+      return res.redirect(
+        `/pedido/${id_pedido}` +
+        `?metodo_entrega=${metodo_entrega}` +
+        `&metodo_pago=${encodeURIComponent(metodo_pago)}`
+      );
+
     } catch (err) {
       await conn.rollback();
       console.error(err);
@@ -742,103 +749,106 @@ app.get(
   asegurarCliente,
   async (req, res) => {
     const id_pedido = parseInt(req.params.id, 10);
+
     try {
-      // Cabecera
+      // Cabecera del pedido
       const [[pedido]] = await pool.query(
-        `SELECT p.id_pedido, p.fecha, p.total, c.nombre AS cliente
+        `SELECT p.id_pedido, p.fecha, p.total, p.metodo_entrega, c.nombre AS cliente
          FROM Pedido p
          JOIN Cliente c ON p.id_cliente = c.id_cliente
          WHERE p.id_pedido = ?`,
         [id_pedido]
       );
+
       if (!pedido) return res.status(404).send('Pedido no encontrado');
 
-      // Detalle
+      // Detalles del pedido
       const [detalles] = await pool.query(
-        `SELECT dp.id_producto, pr.nombre, dp.cantidad, dp.precio_unitario
+        `SELECT dp.cantidad, dp.precio_unitario, pr.nombre
          FROM detallepedido dp
          JOIN producto pr ON dp.id_producto = pr.id_producto
          WHERE dp.id_pedido = ?`,
         [id_pedido]
       );
 
-      res.render('confirmacion_pedido', { pedido, detalles });
+      // Leer método de entrega y pago desde query params
+      const metodo_entrega = req.query.metodo_entrega || '';
+      const metodo_pago = req.query.metodo_pago || '';
+
+      // Renderizar la vista
+      res.render('confirmacion_pedido', {
+        pedido,
+        detalles,
+        metodo_entrega,
+        metodo_pago
+      });
+
     } catch (err) {
       console.error(err);
-      res.status(500).send('Error al cargar confirmación');
+      res.status(500).send('Error al obtener detalles del pedido');
     }
   }
 );
-const PdfPrinter = require("pdfmake");
-const fs = require("fs");
 
+//pdf 
 
-const fonts = {
-  Roboto: {
-    normal: path.join(__dirname, "fonts/Roboto-Regular.ttf"),
-    bold: path.join(__dirname, "fonts/Roboto-Bold.ttf"),
-    italics: path.join(__dirname, "fonts/Roboto-Italic.ttf"),
-    bolditalics: path.join(__dirname, "fonts/Roboto-BoldItalic.ttf")
-  }
-};
-
-const printer = new PdfPrinter(fonts);
-
+// Generar PDF del pedido
 app.get('/pedido/:id/comprobante', async (req, res) => {
-  const id = req.params.id;
-  const pedido = await obtenerPedidoPorId(id); // Tu lógica para recuperar el pedido
-  const detalles = await obtenerDetallesPedido(id); // Productos
+  const id_pedido = parseInt(req.params.id, 10);
 
-  const docDefinition = {
-    content: [
-      { text: 'Comprobante de Pedido', style: 'header' },
-      { text: `Pedido Nº: ${pedido.id_pedido}` },
-      { text: `Cliente: ${pedido.cliente}` },
-      { text: `Fecha: ${pedido.fecha}` },
-      { text: `Total: S/ ${pedido.total}`, margin: [0, 10, 0, 10] },
+  try {
+    // Obtener datos del pedido
+    const [[pedido]] = await pool.query(
+      `SELECT p.id_pedido, p.fecha, p.total, p.metodo_entrega, c.nombre AS cliente
+       FROM Pedido p
+       JOIN Cliente c ON p.id_cliente = c.id_cliente
+       WHERE p.id_pedido = ?`,
+      [id_pedido]
+    );
 
-      {
-        table: {
-          widths: ['*', 'auto', 'auto', 'auto'],
-          body: [
-            ['Producto', 'Cantidad', 'P. Unitario', 'Subtotal'],
-            ...detalles.map(item => [
-              item.nombre,
-              item.cantidad,
-              `S/ ${item.precio_unitario}`,
-              `S/ ${(item.precio_unitario * item.cantidad).toFixed(2)}`
-            ])
-          ]
-        }
-      },
+    if (!pedido) return res.status(404).send('Pedido no encontrado');
 
-      { text: `\nMétodo de entrega: ${pedido.tipo_entrega === 'recojo' ? 'Recojo en tienda' : 'Delivery'}` },
-      ...(pedido.tipo_entrega === 'recojo'
-        ? [{ text: `Tienda: ${pedido.sede_recojo}` }]
-        : [
-            { text: `Dirección: ${pedido.direccion}` },
-            { text: `Distrito: ${pedido.distrito}` },
-            { text: `Referencia: ${pedido.referencia}` }
-          ]),
-      { text: `\nMétodo de pago: ${pedido.metodo_pago}` }
-    ],
-    styles: {
-      header: {
-        fontSize: 18,
-        bold: true,
-        margin: [0, 0, 0, 10]
-      }
-    }
-  };
+    // Obtener detalles del pedido
+    const [detalles] = await pool.query(
+      `SELECT dp.cantidad, dp.precio_unitario, pr.nombre
+       FROM detallepedido dp
+       JOIN producto pr ON dp.id_producto = pr.id_producto
+       WHERE dp.id_pedido = ?`,
+      [id_pedido]
+    );
 
-  const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename=comprobante_${id}.pdf`);
-  pdfDoc.pipe(res);
-  pdfDoc.end();
+    // Puedes obtener esto de la DB también si quieres
+    const metodo_entrega = pedido.metodo_entrega || 'recojo';
+    const metodo_pago = req.query.metodo_pago || 'no especificado';
+
+    // Renderizar HTML con EJS
+    const html = await ejs.renderFile(path.join(__dirname, 'views', 'confirmacion-pdf.ejs'), {
+      pedido,
+      metodo_entrega,
+      metodo_pago,
+      detalles
+    });
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({ format: 'A4' });
+
+    await browser.close();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=pedido_${id_pedido}.pdf`,
+      'Content-Length': pdfBuffer.length
+    });
+
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al generar el comprobante en PDF');
+  }
 });
-
-
 
 
 

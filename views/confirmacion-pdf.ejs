@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Comprobante de Pedido</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    h1, h2 { color: #333; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>Confirmación de Pedido</h1>
+  <p><strong>Pedido Nº:</strong> <%= pedido.id_pedido %></p>
+  <p><strong>Cliente:</strong> <%= pedido.cliente %></p>
+  <p><strong>Fecha:</strong> <%= pedido.fecha.toLocaleString() %></p>
+  <p><strong>Total:</strong> S/ <%= pedido.total %></p>
+  <p><strong>Método de Pago:</strong> <%= metodo_pago %></p>
+  <p><strong>Método de Entrega:</strong> <%= metodo_entrega === 'delivery' ? 'Delivery' : 'Recojo en tienda' %></p>
+
+  <h2>Detalle del Pedido</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Precio Unitario</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% detalles.forEach(item => { %>
+        <tr>
+          <td><%= item.nombre %></td>
+          <td><%= item.cantidad %></td>
+          <td>S/ <%= item.precio_unitario %></td>
+          <td>S/ <%= (item.precio_unitario * item.cantidad).toFixed(2) %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>
