@@ -16,6 +16,16 @@
     <p><strong>Fecha:</strong> <%= pedido.fecha.toLocaleString() %></p>
     <p><strong>Total:</strong> S/ <%= pedido.total %></p>
 
+    <p><strong>Método de Pago:</strong> <%= pedido.metodo_pago %></p>
+    <p><strong>Método de Envío:</strong> <%= pedido.metodo_envio %></p>
+
+    <% if (pedido.metodo_envio === 'Delivery') { %>
+      <h3>Datos de Envío</h3>
+      <p><strong>Dirección:</strong> <%= pedido.direccion_envio.direccion %></p>
+      <p><strong>Distrito:</strong> <%= pedido.direccion_envio.distrito %></p>
+      <p><strong>Teléfono:</strong> <%= pedido.direccion_envio.telefono %></p>
+    <% } %>
+
     <h2>Detalle del Pedido</h2>
     <table>
       <thead>
@@ -40,8 +50,8 @@
 
     <a href="/">Inicio</a>
     <a href="/pedido/<%= pedido.id_pedido %>/comprobante" target="_blank" class="pdf-btn">Descargar Comprobante PDF</a>
-
   </div>
 </body>
+
 
 </html>

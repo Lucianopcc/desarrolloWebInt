@@ -124,13 +124,24 @@ try {
 
 
 /* ========= PÁGINAS ========= */
+//los mas vendidos
 app.get('/', async (req, res) => {
   try {
-    const [productos] = await pool.query('SELECT * FROM producto WHERE estado = 1');
-    res.render('index', { productos });
+    const [masVendidos] = await pool.query(`
+      SELECT p.id_producto, p.nombre, p.imagen, p.precio, p.stock, SUM(dp.cantidad) AS total_vendidos
+      FROM detallepedido dp
+      JOIN producto p ON dp.id_producto = p.id_producto
+      GROUP BY p.id_producto
+      ORDER BY total_vendidos DESC
+      LIMIT 4;
+    `);
+
+    res.render('index', {
+      productos: masVendidos
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error en la base de datos');
+    res.status(500).send('Error al cargar los productos más vendidos');
   }
 });
 
@@ -185,6 +196,7 @@ app.get('/producto/:id', async (req, res) => {
   }
 });
 
+
 // LUMINARIA (id_categoria = 1)
 app.get('/luminarias', async (req, res) => {
   try {
@@ -236,6 +248,7 @@ app.get('/ferreteria', async (req, res) => {
     res.status(500).send('Error al cargar Ferretería');
   }
 });
+
 
 
 /* ========= API CRUD PRODUCTOS ========= */

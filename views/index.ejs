@@ -89,59 +89,26 @@
     <h2>Liquidación</h2>
     <div class="productos">
 
-      <div class="producto-card">
-        <a href="#"><img src="../img/madera1.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/12.00</p>
-          <p class="nombre">Pino Radiata S4S<br>Grado Mueble</p>
-          <p class="marca">Forestal Santa Blanca</p>
+      <% productos.forEach(producto => { %>
+  <% if (producto.stock <= 7) { %>
+    <div class="producto-card">
+      <a href="/producto/<%= producto.id_producto %>">
+        <div class="imagen-con-alerta">
+          <img src="<%= producto.imagen %>" alt="<%= producto.nombre %>" />
+          <span class="alerta-stock">¡POCAS UNIDADES!</span>
         </div>
-      </div>
+      </a>
 
-      <div class="producto-card">
-        <a href=""><img src="../img/madera2.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/30.00</p>
-          <p class="nombre">Melamina Chiavenna</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
+      <div class="producto-info">
+        <p class="precio">S/ <%= Number(producto.precio).toFixed(2) %></p>
+        <p class="nombre"><%= producto.nombre %></p>
       </div>
+    </div>
+  <% } %>
+<% }) %>
 
-      <div class="producto-card">
-        <a href=""><img src="../img/madera3.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/25.00</p>
-          <p class="nombre">Melamina Entablado Natural</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
 
-      <div class="producto-card">
-        <a href=""><img src="../img/madera4.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/26.00</p>
-          <p class="nombre">Melamina Roble Negro</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
 
-       <div class="producto-card">
-        <a href=""><img src="../img/madera5.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/28.00</p>
-          <p class="nombre">Melamina Roble Canela</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
-
-       <div class="producto-card">
-        <a href=""><img src="../img/madera6.jpg" alt="Pino Radiata" /></a>
-        <div class="producto-info">
-          <p class="precio">S/30.00</p>
-          <p class="nombre">Melamina Sonoma Eiche</p>
-          <p class="marca">Tableros Hispanos</p>
-        </div>
-      </div>
 
     </div>
   </section>
