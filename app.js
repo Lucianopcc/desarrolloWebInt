@@ -8,12 +8,18 @@ const session = require('express-session');
 const puppeteer = require('puppeteer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const { enviarNotificaciones } = require('./notifications');
-const ejs = require('ejs'); // <-- ESTA LÍNEA ES OBLIGATORIA si usas ejs.renderFile
+const { sendWhatsApp } = require('./twilioClient');
+
+
+
+
+const ejs = require('ejs');
 
 
 
 const app = express();
 const PORT = 3000;
+
 
 // Configurar sesiones
 app.use(session({
@@ -126,6 +132,21 @@ try {
 });
 
 
+
+app.post('/notificar', async (req, res) => {
+  const numero = req.body.numero; // Asegúrate que tu input se llama 'numero'
+  const mensaje = '¡Hola! El producto ya está disponible.';
+
+  try {
+    await sendWhatsApp(numero, mensaje);
+    res.send('✅ Notificación enviada por WhatsApp');
+  } catch (error) {
+    console.error('❌ Error al enviar WhatsApp:', error);
+    res.status(500).send('Error al enviar la notificación');
+  }
+});
+
+
 /* ========= PÁGINAS ========= */
 //los mas vendidos
 app.get('/', async (req, res) => {
@@ -167,27 +188,18 @@ app.get('/producto/:id', async (req, res) => {
 
     // Ejemplo si tienes un usuario autenticado a través de Passport.js o similar,
     // y asumiendo que `req.user` contiene `id_cliente` y `telefono`.
-    if (req.isAuthenticated && req.isAuthenticated()) { // O una verificación personalizada como `req.session.userId`
-      // Aquí, idealmente, deberías obtener los datos completos del cliente de tu base de datos
-      // usando el ID del usuario logueado (por ejemplo, `req.user.id`).
-      // Por simplicidad, asumiremos que `req.user` ya tiene `id_cliente` y `telefono`.
-      cliente = {
-        id_cliente: req.user.id_cliente, // Asegúrate de que req.user tenga esta propiedad
-        telefono: req.user.telefono      // Asegúrate de que req.user tenga esta propiedad
-      };
-    } else {
-      // Si ningún usuario ha iniciado sesión, o sus datos no están directamente disponibles,
-      // proporciona un objeto cliente por defecto/vacío para evitar errores de EJS.
-      // Ten en cuenta que el formulario de notificación podría no funcionar correctamente
-      // si `id_cliente` es nulo.
-      cliente = {
-        id_cliente: null,
-        telefono: 'No registrado (requiere iniciar sesión)' // Mensaje para el usuario
-      };
-      // También podrías considerar redirigir a los usuarios no autenticados a una página de inicio de sesión
-      // si las notificaciones solo son para usuarios logueados:
-      // return res.redirect('/login');
-    }
+    if (req.session.user) {
+  cliente = {
+    id_cliente: req.session.user.id_cliente,
+    telefono: req.session.user.telefono
+  };
+} else {
+  cliente = {
+    id_cliente: null,
+    telefono: 'No registrado (requiere iniciar sesión)'
+  };
+}
+
     // --- FIN: Código NUEVO para manejar el objeto 'cliente' ---
 
     // Pasa tanto 'producto' como 'cliente' a la plantilla EJS
@@ -315,7 +327,9 @@ app.post('/api/producto', upload.single('imagen'), async (req, res) => {
   }
 });
 
-// Actualizar producto
+
+
+// Actualizar producto (end point administrador)
 app.post('/api/producto/:id', upload.single('imagen'), async (req, res) => {
   const id = req.params.id;
   const { nombre, descripcion, precio, stock, id_proveedor, id_categoria, imagen_actual } = req.body;
@@ -335,22 +349,15 @@ app.post('/api/producto/:id', upload.single('imagen'), async (req, res) => {
       `UPDATE producto
        SET nombre = ?, descripcion = ?, precio = ?, stock = ?, imagen = ?, id_proveedor = ?, id_categoria = ?
        WHERE id_producto = ?`,
-      [
-        nombre,
-        descripcion,
-        parseFloat(precio),
-        newStock,
-        imagen,
-        parseInt(id_proveedor, 10),
-        parseInt(id_categoria, 10),
-        id
-      ]
+      [nombre, descripcion, parseFloat(precio), newStock, imagen, parseInt(id_proveedor, 10), parseInt(id_categoria, 10), id]
     );
 
     // 3. Disparar notificaciones si subió de 0 a >0
     if (oldStock === 0 && newStock > 0) {
       console.log(`Stock pasó de 0 a ${newStock} para producto ${id}, enviando notificaciones…`);
-      await enviarNotificaciones(id);
+      await enviarNotificaciones(id, pool);
+
+
     }
 
     res.json({ mensaje: 'Producto actualizado correctamente' });
@@ -359,6 +366,7 @@ app.post('/api/producto/:id', upload.single('imagen'), async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar producto' });
   }
 });
+
 
 // Apagar (desactivar) producto en lugar de eliminar
 app.delete('/api/producto/:id', async (req, res) => {

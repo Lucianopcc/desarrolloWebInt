@@ -67,18 +67,21 @@
     if (formLogin) {
       formLogin.addEventListener('submit', (e) => {
         e.preventDefault();
-        const usuario = formLogin.querySelector('input[name="usuario"]').value;
-        const password = formLogin.querySelector('input[name="password"]').value;
+       const email = formLogin.querySelector('input[name="usuario"]').value;
+const password = formLogin.querySelector('input[name="password"]').value;
 
-        fetch('/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ usuario, password })
-        })
+
+fetch('/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, password }) // <-- CORRECTO
+})
+
         .then(res => res.json())
         .then(data => {
           if (data.status === 'ok') {
             localStorage.setItem('nombreUsuario', data.nombre); // Asumiendo que el backend responde con nombre
+             localStorage.setItem('id_cliente', data.id_cliente); 
             window.location.href = '/'; // redirige al inicio
           } else {
             alert('Usuario o contraseña incorrectos');

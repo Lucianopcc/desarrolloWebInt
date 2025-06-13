@@ -93,6 +93,10 @@
         </div>
 
       <% } else { %>
+        <% if (!cliente) { %>
+  <script>window.location.href = '/login';</script>
+<% } %>
+
         <div class="card-producto-agotado">
           <p class="agotado-texto">Producto agotado</p>
           <button class="btn-notificar" onclick="abrirModal()">Notificarme cuando esté disponible</button>
@@ -111,7 +115,9 @@
     <form id="formNotificar" method="POST" action="/notificar">
       <input type="hidden" name="productoId" value="<%= producto.id_producto %>">
       <input type="hidden" name="clienteId" value="<%= cliente.id_cliente %>">
-      <p><strong>Número registrado:</strong> <%= cliente.telefono %></p>
+      <label for="telefono">Número de WhatsApp:</label>
+<input type="tel" id="telefono" name="telefono" placeholder="Ej: 987654321" required pattern="[0-9]{9}">
+
       <button type="submit">Enviar</button>
     </form>
   </div>
@@ -281,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <script src="../js/SesionInit.js"></script>
-
+<script src="../twilioClient.js"></script>
 
 
 
