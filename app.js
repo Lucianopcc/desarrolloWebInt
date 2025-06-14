@@ -7,8 +7,6 @@ const cloudinary = require('cloudinary').v2;
 const session = require('express-session');
 const puppeteer = require('puppeteer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const { enviarNotificaciones } = require('./notifications');
-const { sendWhatsApp } = require('./twilioClient');
 
 
 
@@ -131,18 +129,24 @@ try {
   }
 });
 
+//notificaciones
 
+
+const { enviarMensajeWhatsApp } = require('./bot'); // Venom-bot
 
 app.post('/notificar', async (req, res) => {
-  const numero = req.body.numero; // Asegúrate que tu input se llama 'numero'
-  const mensaje = '¡Hola! El producto ya está disponible.';
+  const { productoId, clienteId } = req.body;
 
   try {
-    await sendWhatsApp(numero, mensaje);
-    res.send('✅ Notificación enviada por WhatsApp');
+    await pool.query(
+      'INSERT INTO notificaciones (id_producto, id_cliente, enviado) VALUES (?, ?, FALSE)',
+      [productoId, clienteId]
+    );
+
+    res.send('✅ Te notificaremos por WhatsApp cuando el producto esté disponible.');
   } catch (error) {
-    console.error('❌ Error al enviar WhatsApp:', error);
-    res.status(500).send('Error al enviar la notificación');
+    console.error('❌ Error al guardar notificación:', error);
+    res.status(500).send('Error al registrar tu solicitud');
   }
 });
 
@@ -352,13 +356,29 @@ app.post('/api/producto/:id', upload.single('imagen'), async (req, res) => {
       [nombre, descripcion, parseFloat(precio), newStock, imagen, parseInt(id_proveedor, 10), parseInt(id_categoria, 10), id]
     );
 
-    // 3. Disparar notificaciones si subió de 0 a >0
-    if (oldStock === 0 && newStock > 0) {
-      console.log(`Stock pasó de 0 a ${newStock} para producto ${id}, enviando notificaciones…`);
-      await enviarNotificaciones(id, pool);
+ // 3. Disparar notificaciones si subió de 0 a >0
+if (oldStock === 0 && newStock > 0) {
+  console.log(`Stock pasó de 0 a ${newStock} para producto ${id}, enviando notificaciones…`);
+
+  const [notificaciones] = await pool.query(`
+    SELECT n.id_notificacion, n.id_producto, c.telefono
+    FROM notificaciones n
+    JOIN cliente c ON n.id_cliente = c.id_cliente
+    WHERE n.id_producto = ? AND n.enviado = FALSE
+  `, [id]);
+
+  for (let noti of notificaciones) {
+    const mensaje = `¡Hola! El producto "${nombre}" ya está disponible. Visítanos para comprarlo.`;
+    await enviarMensajeWhatsApp(noti.telefono, mensaje);
+
+    await pool.query(
+      'UPDATE notificaciones SET enviado = TRUE WHERE id_notificacion = ?',
+      [noti.id_notificacion]
+    );
+  }
+}
 
 
-    }
 
     res.json({ mensaje: 'Producto actualizado correctamente' });
   } catch (err) {
